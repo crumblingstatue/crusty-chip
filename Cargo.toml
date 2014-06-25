@@ -1,0 +1,9 @@
+[package]
+
+name = "crusty-chip"
+version = "0.1.0"
+authors = [ "radiantstatue@gmail.com" ]
+
+[[lib]]
+
+name = "crustychip"
