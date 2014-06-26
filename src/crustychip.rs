@@ -64,11 +64,11 @@ impl Chip8 {
 
         match ins & 0xF000 {
             0x1000 => self.jump_addr(ins & 0x0FFF),
-            0x3000 => self.skip_next_vx_eq(((ins & 0x0F00) << 8) as uint, (ins & 0x00FF) as u8),
-            0x7000 => self.add_vx_byte(((ins & 0x0F00) << 8) as uint, (ins & 0x00FF) as u8),
+            0x3000 => self.skip_next_vx_eq(((ins & 0x0F00) >> 8) as uint, (ins & 0x00FF) as u8),
+            0x7000 => self.add_vx_byte(((ins & 0x0F00) >> 8) as uint, (ins & 0x00FF) as u8),
             0xA000 => self.set_i(ins & 0x0FFF),
-            0xC000 => self.set_vx_rand_and(((ins & 0x0F00) << 8) as uint, (ins & 0x00FF) as u8),
-            0xD000 => self.display_sprite(((ins & 0x0F00) << 8) as uint, ((ins & 0x00F0) << 8) as uint, ((ins & 0x000F) << 8) as uint),
+            0xC000 => self.set_vx_rand_and(((ins & 0x0F00) >> 8) as uint, (ins & 0x00FF) as u8),
+            0xD000 => self.display_sprite(((ins & 0x0F00) >> 8) as uint, ((ins & 0x00F0) >> 4) as uint, ((ins & 0x000F)) as uint),
             _ => fail!("Unkown instruction: {:x}", ins)
         }
 
