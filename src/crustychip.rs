@@ -103,7 +103,7 @@ impl Chip8 {
         for y in range(0u, n) {
             let b = self.ram[self.i as uint + y];
             for x in range(0u, 8) {
-                self.display[offset + (y * DISPLAY_WIDTH) + x] ^= b & (1 << x);
+                self.display[offset + (y * DISPLAY_WIDTH) + x] ^= b & (0b10000000 >> x);
             }
         }
     }
