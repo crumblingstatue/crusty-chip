@@ -66,6 +66,7 @@ impl Chip8 {
         match ins & 0xF000 {
             0x1000 => self.jump_addr(ins & 0x0FFF),
             0x3000 => self.skip_next_vx_eq(((ins & 0x0F00) >> 8) as uint, (ins & 0x00FF) as u8),
+            0x6000 => self.set_vx_byte(((ins & 0x0F00) >> 8) as uint, (ins & 0x00FF) as u8),
             0x7000 => self.add_vx_byte(((ins & 0x0F00) >> 8) as uint, (ins & 0x00FF) as u8),
             0xA000 => self.set_i(ins & 0x0FFF),
             0xC000 => self.set_vx_rand_and(((ins & 0x0F00) >> 8) as uint, (ins & 0x00FF) as u8),
@@ -110,6 +111,10 @@ impl Chip8 {
 
     fn add_vx_byte(&mut self, x: uint, byte: u8) {
         self.v[x] += byte;
+    }
+
+    fn set_vx_byte(&mut self, x: uint, byte: u8) {
+        self.v[x] = byte;
     }
 
     fn jump_addr(&mut self, addr: u16) {
