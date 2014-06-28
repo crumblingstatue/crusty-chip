@@ -99,7 +99,6 @@ impl Chip8 {
 
     fn display_sprite(&mut self, vx: uint, vy: uint, n: uint) {
         let offset = self.v[vx] as uint + (self.v[vy] as uint * DISPLAY_WIDTH);
-        println!("n={}", n);
 
         for y in range(0u, n) {
             let b = self.ram[self.i as uint + y];
