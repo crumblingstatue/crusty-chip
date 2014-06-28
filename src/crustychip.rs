@@ -98,12 +98,25 @@ impl Chip8 {
     }
 
     fn display_sprite(&mut self, vx: uint, vy: uint, n: uint) {
-        let offset = self.v[vx] as uint + (self.v[vy] as uint * DISPLAY_WIDTH);
+        let x_off = self.v[vx] as uint;
+        let y_off = self.v[vy] as uint * DISPLAY_WIDTH;
+        let offset = x_off + y_off;
 
-        for y in range(0u, n) {
+        for mut y in range(0u, n) {
+            if y >= DISPLAY_HEIGHT {
+                y = y - DISPLAY_HEIGHT;
+            }
             let b = self.ram[self.i as uint + y];
-            for x in range(0u, 8) {
-                self.display[offset + (y * DISPLAY_WIDTH) + x] ^= b & (0b10000000 >> x);
+            for mut x in range(0u, 8) {
+                if x >= DISPLAY_WIDTH {
+                    x = x - DISPLAY_WIDTH;
+                }
+                let idx = offset + (y * DISPLAY_WIDTH) + x;
+                if idx < DISPLAY_WIDTH * DISPLAY_HEIGHT {
+                    self.display[idx] ^= b & (0b10000000 >> x);
+                } else {
+                    println!("Warning: Out of bounds VRAM write: {}", idx);
+                }
             }
         }
     }
