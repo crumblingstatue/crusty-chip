@@ -109,7 +109,7 @@ impl Chip8 {
     }
 
     fn add_vx_byte(&mut self, x: uint, byte: u8) {
-        self.v[x] = byte;
+        self.v[x] += byte;
     }
 
     fn jump_addr(&mut self, addr: u16) {
