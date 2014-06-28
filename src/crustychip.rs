@@ -61,6 +61,7 @@ impl Chip8 {
 
     pub fn do_cycle(&mut self) {
         let ins = self.get_ins();
+        self.pc += 2;
 
         match ins & 0xF000 {
             0x1000 => self.jump_addr(ins & 0x0FFF),
@@ -71,8 +72,6 @@ impl Chip8 {
             0xD000 => self.display_sprite(((ins & 0x0F00) >> 8) as uint, ((ins & 0x00F0) >> 4) as uint, ((ins & 0x000F)) as uint),
             _ => fail!("Unkown instruction: {:x}", ins)
         }
-
-        self.pc += 2;
     }
 
     fn get_ins(&self) -> u16 {
@@ -97,22 +96,15 @@ impl Chip8 {
         }
     }
 
-    fn display_sprite(&mut self, x: uint, y: uint, n: uint) {
-        let bytes = self.ram.slice(self.i as uint, self.i as uint + n);
-        let start = y * DISPLAY_WIDTH + x;
-        let mut i = 0;
+    fn display_sprite(&mut self, vx: uint, vy: uint, n: uint) {
+        let offset = self.v[vx] as uint + (self.v[vy] as uint * DISPLAY_WIDTH);
+        println!("n={}", n);
 
-        for b in bytes.iter() {
-            let before = self.display[start + i];
-            self.display[start + i] ^= *b;
-
-            if before != 0 && self.display[start + i] == 0 {
-                self.v[0xf] = 1;
-            } else {
-                self.v[0xf] = 0;
+        for y in range(0u, n) {
+            let b = self.ram[self.i as uint + y];
+            for x in range(0u, 8) {
+                self.display[offset + (y * DISPLAY_WIDTH) + x] ^= b & (1 << x);
             }
-
-            i += 1;
         }
     }
 
