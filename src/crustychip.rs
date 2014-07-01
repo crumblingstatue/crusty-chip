@@ -1,3 +1,5 @@
+use std::slice::bytes::copy_memory;
+
 static START_ADDR: u16 = 0x200;
 static MEM_SIZE: uint = 4096;
 pub static DISPLAY_WIDTH: uint = 64;
@@ -35,6 +37,7 @@ pub struct Chip8 {
 }
 
 impl Chip8 {
+
     pub fn new() -> Chip8 {
         Chip8 {
             ram: [0u8, .. MEM_SIZE],
@@ -50,7 +53,6 @@ impl Chip8 {
     }
 
     pub fn load_rom(&mut self, rom: &[u8]) {
-        use std::slice::bytes::copy_memory;
         let len = self.ram.len();
         copy_memory(self.ram.mut_slice(START_ADDR as uint, len), rom);
     }
@@ -66,12 +68,32 @@ impl Chip8 {
         match ins & 0xF000 {
             0x1000 => self.jump_addr(ins & 0x0FFF),
             0x3000 => self.skip_next_vx_eq(((ins & 0x0F00) >> 8) as uint, (ins & 0x00FF) as u8),
+            0x5000 => match ins & 0x000F {
+                0x0000 => self.skip_next_vx_eq_vy(((ins & 0x0F00) >> 8) as uint, ((ins & 0x00F0) >> 4) as uint),
+                _ => fail!("Unknown 0x5XXX instruction: {:x}", ins)
+            },
             0x6000 => self.set_vx_byte(((ins & 0x0F00) >> 8) as uint, (ins & 0x00FF) as u8),
             0x7000 => self.add_vx_byte(((ins & 0x0F00) >> 8) as uint, (ins & 0x00FF) as u8),
+            0x8000 => match ins & 0x000F {
+                0x0000 => self.set_vx_to_vy(((ins & 0x0F00) >> 8) as uint, ((ins & 0x00F0) >> 4) as uint),
+                0x0004 => self.add_vx_vy(((ins & 0x0F00) >> 8) as uint, ((ins & 0x00F0) >> 4) as uint),
+                0x0005 => self.sub_vx_vy(((ins & 0x0F00) >> 8) as uint, ((ins & 0x00F0) >> 4) as uint),
+                _ => fail!("Unknown 0x8XXX instruction: {:x}", ins)
+            },
+            0x9000 => match ins & 0x000F {
+                0x0000 => self.skip_next_vx_ne_vy(((ins & 0x0F00) >> 8) as uint, ((ins & 0x00F0) >> 4) as uint),
+                _ => fail!("Unknown 0x9XXX instruction: {:x}", ins)
+            },
             0xA000 => self.set_i(ins & 0x0FFF),
             0xC000 => self.set_vx_rand_and(((ins & 0x0F00) >> 8) as uint, (ins & 0x00FF) as u8),
             0xD000 => self.display_sprite(((ins & 0x0F00) >> 8) as uint, ((ins & 0x00F0) >> 4) as uint, ((ins & 0x000F)) as uint),
-            _ => fail!("Unkown instruction: {:x}", ins)
+            0xF000 => match ins & 0x00FF {
+                0x0055 => self.copy_v0_through_vx_to_mem(((ins & 0x0F00) >> 8) as uint),
+                0x0065 => self.read_v0_through_vx_from_mem(((ins & 0x0F00) >> 8) as uint),
+                0x001E => self.add_vx_to_i(((ins & 0x0F00) >> 8) as uint),
+                _ => fail!("Unknown 0xFXXX instruction: {:x}", ins)
+            },
+            _ => fail!("Unknown instruction: {:x}", ins)
         }
     }
 
@@ -131,5 +153,50 @@ impl Chip8 {
 
     fn jump_addr(&mut self, addr: u16) {
         self.pc = addr;
+    }
+
+    fn set_vx_to_vy(&mut self, x: uint, y: uint) {
+        self.v[x] = self.v[y];
+    }
+
+    fn add_vx_vy(&mut self, x: uint, y: uint) {
+        let result = (self.v[x] + self.v[y]) as u16;
+        self.v[0xF] = (result > 255) as u8;
+        self.v[x] = result as u8;
+    }
+
+    fn sub_vx_vy(&mut self, x: uint, y: uint) {
+        self.v[0xF] = (self.v[x] > self.v[y]) as u8;
+        self.v[x] -= self.v[y];
+    }
+
+    fn add_vx_to_i(&mut self, x: uint) {
+        self.i += x as u16;
+    }
+
+    fn copy_v0_through_vx_to_mem(&mut self, x: uint) {
+        if x == 0 {
+            return;
+        }
+        copy_memory(self.ram.mut_slice(self.i as uint, x), self.v.slice(0, x));
+    }
+
+    fn read_v0_through_vx_from_mem(&mut self, x: uint) {
+        if x == 0 {
+            return;
+        }
+        copy_memory(self.v.mut_slice(0, x), self.ram.slice(self.i as uint, x));
+    }
+
+    fn skip_next_vx_eq_vy(&mut self, x: uint, y: uint) {
+        if self.v[x] == self.v[y] {
+            self.pc += 2;
+        }
+    }
+
+    fn skip_next_vx_ne_vy(&mut self, x: uint, y: uint) {
+        if self.v[x] != self.v[y] {
+            self.pc += 2;
+        }
     }
 }
