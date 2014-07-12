@@ -61,10 +61,6 @@ impl <'a> Chip8 <'a> {
         copy_memory(self.ram.mut_slice(START_ADDR as uint, len), rom);
     }
 
-    pub fn get_display(&self) -> [u8, .. DISPLAY_WIDTH * DISPLAY_HEIGHT] {
-        self.display
-    }
-
     pub fn do_cycle(&mut self) {
         let ins = self.get_ins();
         self.pc += 2;
