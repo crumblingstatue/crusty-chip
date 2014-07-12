@@ -1,3 +1,9 @@
+//! CHIP-8 emulator backend.
+//! You can develop your own frontends for it.
+//!
+//! The reference frontend is
+//! [crusty-chip-sfml](https://github.com/crumblingstatue/crusty-chip-sfml).
+
 use std::slice::bytes::copy_memory;
 
 static START_ADDR: u16 = 0x200;
@@ -26,6 +32,7 @@ static fontset: [[u8, .. 5], .. 0x10] = [
 
 type DrawCallback<'a> = |pixels: &[u8], w: uint, h: uint|: 'a;
 
+/// CHIP-8 virtual machine
 pub struct Chip8<'a> {
     ram: [u8, .. MEM_SIZE],
     v: [u8, .. 16],
@@ -41,6 +48,10 @@ pub struct Chip8<'a> {
 
 impl <'a> Chip8 <'a> {
 
+    /// Create a new Chip8 VM
+    ///
+    /// ## Arguments ##
+    /// * draw_callback - Callback used when drawing
     pub fn new(draw_callback: DrawCallback<'a>) -> Chip8<'a> {
         Chip8 {
             ram: [0u8, .. MEM_SIZE],
@@ -56,11 +67,16 @@ impl <'a> Chip8 <'a> {
         }
     }
 
+    /// Load a ROM
+    ///
+    /// ## Arguments ##
+    /// * rom - ROM to load
     pub fn load_rom(&mut self, rom: &[u8]) {
         let len = self.ram.len();
         copy_memory(self.ram.mut_slice(START_ADDR as uint, len), rom);
     }
 
+    /// Do an emulation cycle.
     pub fn do_cycle(&mut self) {
         let ins = self.get_ins();
         self.pc += 2;
@@ -141,7 +157,7 @@ impl <'a> Chip8 <'a> {
                 }
             }
         }
-        
+
         (self.draw_callback)(self.display, DISPLAY_WIDTH, DISPLAY_HEIGHT);
     }
 
