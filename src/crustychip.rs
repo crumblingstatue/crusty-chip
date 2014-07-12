@@ -24,7 +24,9 @@ static fontset: [[u8, .. 5], .. 0x10] = [
     [0xF0, 0x80, 0xF0, 0x80, 0x80], // F
 ];
 
-pub struct Chip8 {
+type DrawCallback<'a> = |pixels: &[u8], w: uint, h: uint|: 'a;
+
+pub struct Chip8<'a> {
     ram: [u8, .. MEM_SIZE],
     v: [u8, .. 16],
     i: u16,
@@ -33,12 +35,13 @@ pub struct Chip8 {
     pc: u16,
     sp: u8,
     stack: [u16, .. 16],
-    display: [u8, .. DISPLAY_WIDTH * DISPLAY_HEIGHT]
+    display: [u8, .. DISPLAY_WIDTH * DISPLAY_HEIGHT],
+    draw_callback: DrawCallback<'a>
 }
 
-impl Chip8 {
+impl <'a> Chip8 <'a> {
 
-    pub fn new() -> Chip8 {
+    pub fn new(draw_callback: DrawCallback<'a>) -> Chip8<'a> {
         Chip8 {
             ram: [0u8, .. MEM_SIZE],
             v: [0u8, .. 16],
@@ -48,7 +51,8 @@ impl Chip8 {
             pc: START_ADDR,
             sp: 0,
             stack: [0u16, .. 16],
-            display: [0u8, .. DISPLAY_WIDTH * DISPLAY_HEIGHT]
+            display: [0u8, .. DISPLAY_WIDTH * DISPLAY_HEIGHT],
+            draw_callback: draw_callback
         }
     }
 
@@ -141,6 +145,8 @@ impl Chip8 {
                 }
             }
         }
+        
+        (self.draw_callback)(self.display, DISPLAY_WIDTH, DISPLAY_HEIGHT);
     }
 
     fn add_vx_byte(&mut self, x: uint, byte: u8) {
