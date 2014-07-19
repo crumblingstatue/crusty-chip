@@ -30,7 +30,7 @@ static fontset: [[u8, .. 5], .. 0x10] = [
     [0xF0, 0x80, 0xF0, 0x80, 0x80], // F
 ];
 
-type DrawCallback<'a> = |pixels: &[u8], w: uint, h: uint|: 'a;
+type DrawCallback<'a> = |pixels: &[u8]|: 'a;
 
 /// CHIP-8 virtual machine
 pub struct Chip8<'a> {
@@ -158,7 +158,7 @@ impl <'a> Chip8 <'a> {
             }
         }
 
-        (self.draw_callback)(self.display, DISPLAY_WIDTH, DISPLAY_HEIGHT);
+        (self.draw_callback)(self.display);
     }
 
     fn add_vx_byte(&mut self, x: uint, byte: u8) {
