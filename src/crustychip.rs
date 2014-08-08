@@ -270,7 +270,7 @@ impl <'a> Chip8 <'a> {
     //
     // For crusty-chip, the fontset is stored at 0x000
     fn set_i_to_loc_of_digit_vx(&mut self, x: uint) {
-        self.i = (x * 5) as u16;
+        self.i = (self.v[x] * 5) as u16;
     }
 
     // 00EE - RET
