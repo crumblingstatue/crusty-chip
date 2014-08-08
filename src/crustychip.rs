@@ -145,6 +145,7 @@ impl <'a> Chip8 <'a> {
             0x7000 => self.add_vx_byte(((ins & 0x0F00) >> 8) as uint, (ins & 0x00FF) as u8),
             0x8000 => match ins & 0x000F {
                 0x0000 => self.set_vx_to_vy(((ins & 0x0F00) >> 8) as uint, ((ins & 0x00F0) >> 4) as uint),
+                0x0002 => self.set_vx_to_vx_and_vy(((ins & 0x0F00) >> 8) as uint, ((ins & 0x00F0) >> 4) as uint),
                 0x0003 => self.set_vx_to_vx_xor_vy(((ins & 0x0F00) >> 8) as uint, ((ins & 0x00F0) >> 4) as uint),
                 0x0004 => self.add_vx_vy(((ins & 0x0F00) >> 8) as uint, ((ins & 0x00F0) >> 4) as uint),
                 0x0005 => self.sub_vx_vy(((ins & 0x0F00) >> 8) as uint, ((ins & 0x00F0) >> 4) as uint),
@@ -158,6 +159,10 @@ impl <'a> Chip8 <'a> {
             0xA000 => self.set_i(ins & 0x0FFF),
             0xC000 => self.set_vx_rand_and(((ins & 0x0F00) >> 8) as uint, (ins & 0x00FF) as u8),
             0xD000 => self.display_sprite(((ins & 0x0F00) >> 8) as uint, ((ins & 0x00F0) >> 4) as uint, ((ins & 0x000F)) as uint),
+            0xE000 => match ins & 0x00FF {
+                0x00A1 => self.skip_next_key_vx_not_pressed(((ins & 0x0F00) >> 8) as uint),
+                _ => fail!("Unknown 0xEXXX instruction: {:x}", ins)
+            },
             0xF000 => match ins & 0x00FF {
                 0x000A => self.wait_for_keypress_store_in_vx(((ins & 0x0F00) >> 8) as uint),
                 0x0007 => self.set_vx_to_delay_timer(((ins & 0x0F00) >> 8) as uint),
@@ -392,6 +397,28 @@ impl <'a> Chip8 <'a> {
     fn set_vx_to_vx_shl_1(&mut self, x: uint) {
         // TODO: Is this just a left shift by 1?
         self.v[x] <<= 1;
+    }
+
+    // 8xy2 - AND Vx, Vy
+    // Set Vx = Vx AND Vy.
+    //
+    // Performs a bitwise AND on the values of Vx and Vy, then stores the
+    // result in Vx. A bitwise AND compares the corrseponding bits from two
+    // values, and if both bits are 1, then the same bit in the result is also
+    // 1. Otherwise, it is 0.
+    fn set_vx_to_vx_and_vy(&mut self, x: uint, y: uint) {
+        self.v[x] &= self.v[y];
+    }
+
+    // ExA1 - SKNP Vx
+    // Skip next instruction if key with the value of Vx is not pressed.
+    //
+    // Checks the keyboard, and if the key corresponding to the value of
+    // Vx is currently in the up position, PC is increased by 2.
+    fn skip_next_key_vx_not_pressed(&mut self, x: uint) {
+        if !self.keys[self.v[x] as uint] {
+            self.pc += 2;
+        }
     }
 
     /// Press a key on the hexadecimal keypad
