@@ -109,7 +109,7 @@ impl <'a> Chip8 <'a> {
                 0x001E => self.add_vx_to_i(((ins & 0x0F00) >> 8) as uint),
                 _ => fail!("Unknown 0xFXXX instruction: {:x}", ins)
             },
-            _ => fail!("Unknown instruction: {:x}", ins)
+            _ => fail!("Unknown instruction: {:04x}", ins)
         }
     }
 
