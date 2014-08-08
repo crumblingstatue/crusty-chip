@@ -119,14 +119,17 @@ impl <'a> Chip8 <'a> {
 
     /// Do an emulation cycle.
     pub fn do_cycle(&mut self) {
-
         if self.keypress_wait.wait {
             return;
         }
 
         let ins = self.get_ins();
         self.pc += 2;
+        self.dispatch(ins);
+    }
 
+    // Decode instruction and execute it
+    fn dispatch(&mut self, ins: u16) {
         match ins & 0xF000 {
             0x0000 => match ins & 0x0FFF {
                 0x00E0 => self.clear_display(),
