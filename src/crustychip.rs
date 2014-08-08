@@ -130,14 +130,15 @@ impl <'a> Chip8 <'a> {
 
     // Decode instruction and execute it
     fn dispatch(&mut self, ins: u16) {
+        let nnn = ins & 0x0FFF;
         match ins & 0xF000 {
-            0x0000 => match ins & 0x0FFF {
+            0x0000 => match nnn {
                 0x00E0 => self.clear_display(),
                 0x00EE => self.ret_from_subroutine(),
                 _ => self.jump_to_sys_routine(0)
             },
-            0x2000 => self.call_subroutine((ins & 0xFFF) as uint),
-            0x1000 => self.jump_addr(ins & 0x0FFF),
+            0x2000 => self.call_subroutine(nnn as uint),
+            0x1000 => self.jump_addr(nnn),
             0x3000 => self.skip_next_vx_eq(((ins & 0x0F00) >> 8) as uint, (ins & 0x00FF) as u8),
             0x4000 => self.skip_next_vx_ne(((ins & 0x0F00) >> 8) as uint, (ins & 0x00FF) as u8),
             0x5000 => match ins & 0x000F {
@@ -163,7 +164,7 @@ impl <'a> Chip8 <'a> {
                 0x0000 => self.skip_next_vx_ne_vy(((ins & 0x0F00) >> 8) as uint, ((ins & 0x00F0) >> 4) as uint),
                 _ => fail!("Unknown 0x9XXX instruction: {:x}", ins)
             },
-            0xA000 => self.set_i(ins & 0x0FFF),
+            0xA000 => self.set_i(nnn),
             0xC000 => self.set_vx_rand_and(((ins & 0x0F00) >> 8) as uint, (ins & 0x00FF) as u8),
             0xD000 => self.display_sprite(((ins & 0x0F00) >> 8) as uint, ((ins & 0x00F0) >> 4) as uint, ((ins & 0x000F)) as uint),
             0xE000 => match ins & 0x00FF {
