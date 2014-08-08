@@ -132,6 +132,7 @@ impl <'a> Chip8 <'a> {
     fn dispatch(&mut self, ins: u16) {
         let nnn = ins & 0x0FFF;
         let x = (ins & 0x0F00) >> 8;
+        let y = (ins & 0x00F0) >> 4;
         let kk = (ins & 0x00FF) as u8;
         match ins & 0xF000 {
             0x0000 => match nnn {
@@ -144,30 +145,30 @@ impl <'a> Chip8 <'a> {
             0x3000 => self.skip_next_vx_eq(x as uint, kk),
             0x4000 => self.skip_next_vx_ne(x as uint, kk),
             0x5000 => match ins & 0x000F {
-                0x0000 => self.skip_next_vx_eq_vy(x as uint, ((ins & 0x00F0) >> 4) as uint),
+                0x0000 => self.skip_next_vx_eq_vy(x as uint, y as uint),
                 _ => fail!("Unknown 0x5XXX instruction: {:x}", ins)
             },
             0x6000 => self.set_vx_byte(x as uint, kk),
             0x7000 => self.add_vx_byte(x as uint, kk),
             0x8000 => {
-                let y = ((ins & 0x00F0) >> 4) as uint;
+                let (x, y) = (x as uint, y as uint);
                 match ins & 0x000F {
-                    0x0000 => self.set_vx_to_vy(x as uint, y),
-                    0x0002 => self.set_vx_to_vx_and_vy(x as uint, y),
-                    0x0003 => self.set_vx_to_vx_xor_vy(x as uint, y),
-                    0x0004 => self.add_vx_vy(x as uint, y),
-                    0x0005 => self.sub_vx_vy(x as uint, y),
-                    0x000E => self.set_vx_to_vx_shl_1(x as uint),
+                    0x0000 => self.set_vx_to_vy(x, y),
+                    0x0002 => self.set_vx_to_vx_and_vy(x, y),
+                    0x0003 => self.set_vx_to_vx_xor_vy(x, y),
+                    0x0004 => self.add_vx_vy(x, y),
+                    0x0005 => self.sub_vx_vy(x, y),
+                    0x000E => self.set_vx_to_vx_shl_1(x),
                     _ => fail!("Unknown 0x8XXX instruction: {:x}", ins)
                 }
             },
             0x9000 => match ins & 0x000F {
-                0x0000 => self.skip_next_vx_ne_vy(x as uint, ((ins & 0x00F0) >> 4) as uint),
+                0x0000 => self.skip_next_vx_ne_vy(x as uint, y as uint),
                 _ => fail!("Unknown 0x9XXX instruction: {:x}", ins)
             },
             0xA000 => self.set_i(nnn),
             0xC000 => self.set_vx_rand_and(x as uint, kk),
-            0xD000 => self.display_sprite(x as uint, ((ins & 0x00F0) >> 4) as uint, ((ins & 0x000F)) as uint),
+            0xD000 => self.display_sprite(x as uint, y as uint, ((ins & 0x000F)) as uint),
             0xE000 => match ins & 0x00FF {
                 0x00A1 => self.skip_next_key_vx_not_pressed(x as uint),
                 _ => fail!("Unknown 0xEXXX instruction: {:x}", ins)
