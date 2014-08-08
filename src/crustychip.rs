@@ -146,8 +146,8 @@ impl <'a> Chip8 <'a> {
             0x1 => self.jump_addr(nnn),
             0x3 => self.skip_next_vx_eq(x as uint, kk),
             0x4 => self.skip_next_vx_ne(x as uint, kk),
-            0x5 => match ins & 0x000F {
-                0x0000 => self.skip_next_vx_eq_vy(x as uint, y as uint),
+            0x5 => match n {
+                0x0 => self.skip_next_vx_eq_vy(x as uint, y as uint),
                 _ => fail!("Unknown 0x5XXX instruction: {:x}", ins)
             },
             0x6 => self.set_vx_byte(x as uint, kk),
