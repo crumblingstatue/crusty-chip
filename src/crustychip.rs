@@ -30,7 +30,34 @@ static fontset: [u8, .. 5 * 0x10] = [
     0xF0, 0x80, 0xF0, 0x80, 0x80, // F
 ];
 
-type DrawCallback<'a> = |pixels: &[u8]|: 'a;
+/// Draw callback.
+///
+/// Takes a slice of u8, where each u8 is a pixel.
+///
+/// A **non-zero** pixel is visible, a **zero** pixel is not visible.
+///
+/// The coordinate system is from top-left to bottom-right.
+///
+/// Example:
+///
+/// ```rust
+///     use crustychip::{ DISPLAY_WIDTH, Chip8 };
+///     // Dump the pixels to stdout
+///     fn dump_pixels(pixels: &[u8]) {
+///         for (i, px) in pixels.iter().enumerate() {
+///             match *px {
+///                 0 => print!(" "),
+///                 _ => print!("#")
+///             }
+///             if i % DISPLAY_WIDTH == 0 {
+///                 print!("\n");
+///             }
+///         }
+///     }
+///     let mut ch8 = Chip8::new(dump_pixels);
+///     // ...
+/// ```
+pub type DrawCallback<'a> = |pixels: &[u8]|: 'a;
 
 /// CHIP-8 virtual machine
 pub struct Chip8<'a> {
