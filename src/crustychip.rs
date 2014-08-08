@@ -130,13 +130,18 @@ impl <'a> Chip8 <'a> {
 
     // Decode instruction and execute it
     fn dispatch(&mut self, ins: u16) {
-        let i = (ins & 0xF000) >> 12;
+        // A 12-bit value, the lowest 12 bits of the instruction
         let nnn = ins & 0x0FFF;
-        let x = (ins & 0x0F00) >> 8;
-        let y = (ins & 0x00F0) >> 4;
-        let kk = (ins & 0x00FF) as u8;
+        // A 4-bit value, the lowest 4 bits of the instruction
         let n = ins & 0x000F;
-        match i {
+        // A 4-bit value, the lower 4 bits of the high byte of the instruction
+        let x = (ins & 0x0F00) >> 8;
+        // A 4-bit value, the upper 4 bits of the low byte of the instruction
+        let y = (ins & 0x00F0) >> 4;
+        // kk or byte - An 8-bit value, the lowest 8 bits of the instruction
+        let kk = (ins & 0x00FF) as u8;
+
+        match (ins & 0xF000) >> 12 {
             0x0 => match nnn {
                 0x0E0 => self.clear_display(),
                 0x0EE => self.ret_from_subroutine(),
