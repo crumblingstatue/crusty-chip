@@ -82,6 +82,10 @@ impl <'a> Chip8 <'a> {
         self.pc += 2;
 
         match ins & 0xF000 {
+            0x0000 => match ins & 0x0FFF {
+                0x00E0 => self.clear_display(),
+                _ => self.jump_to_sys_routine(0)
+            },
             0x1000 => self.jump_addr(ins & 0x0FFF),
             0x3000 => self.skip_next_vx_eq(((ins & 0x0F00) >> 8) as uint, (ins & 0x00FF) as u8),
             0x5000 => match ins & 0x000F {
@@ -216,5 +220,15 @@ impl <'a> Chip8 <'a> {
         if self.v[x] != self.v[y] {
             self.pc += 2;
         }
+    }
+
+    fn clear_display(&mut self) {
+        for px in self.display.mut_iter() {
+            *px = 0;
+        }
+    }
+
+    fn jump_to_sys_routine(&mut self, addr: uint) {
+        unimplemented!();
     }
 }
