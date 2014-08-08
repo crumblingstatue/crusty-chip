@@ -11,23 +11,23 @@ static MEM_SIZE: uint = 4096;
 pub static DISPLAY_WIDTH: uint = 64;
 pub static DISPLAY_HEIGHT: uint = 32;
 
-static fontset: [[u8, .. 5], .. 0x10] = [
-    [0xF0, 0x90, 0x90, 0x90, 0xF0], // 0
-    [0x20, 0x60, 0x20, 0x20, 0x70], // 1
-    [0xF0, 0x10, 0xF0, 0x80, 0xF0], // 2
-    [0xF0, 0x10, 0xF0, 0x10, 0xF0], // 3
-    [0x90, 0x90, 0xF0, 0x10, 0x10], // 4
-    [0xF0, 0x80, 0xF0, 0x10, 0xF0], // 5
-    [0xF0, 0x80, 0xF0, 0x90, 0xF0], // 6
-    [0xF0, 0x10, 0x20, 0x40, 0x40], // 7
-    [0xF0, 0x90, 0xF0, 0x90, 0xF0], // 8
-    [0xF0, 0x90, 0xF0, 0x10, 0xF0], // 9
-    [0xF0, 0x90, 0xF0, 0x90, 0x90], // A
-    [0xE0, 0x90, 0xE0, 0x90, 0xE0], // B
-    [0xF0, 0x80, 0x80, 0x80, 0xF0], // C
-    [0xE0, 0x90, 0x90, 0x90, 0xE0], // D
-    [0xF0, 0x80, 0xF0, 0x80, 0xF0], // E
-    [0xF0, 0x80, 0xF0, 0x80, 0x80], // F
+static fontset: [u8, .. 5 * 0x10] = [
+    0xF0, 0x90, 0x90, 0x90, 0xF0, // 0
+    0x20, 0x60, 0x20, 0x20, 0x70, // 1
+    0xF0, 0x10, 0xF0, 0x80, 0xF0, // 2
+    0xF0, 0x10, 0xF0, 0x10, 0xF0, // 3
+    0x90, 0x90, 0xF0, 0x10, 0x10, // 4
+    0xF0, 0x80, 0xF0, 0x10, 0xF0, // 5
+    0xF0, 0x80, 0xF0, 0x90, 0xF0, // 6
+    0xF0, 0x10, 0x20, 0x40, 0x40, // 7
+    0xF0, 0x90, 0xF0, 0x90, 0xF0, // 8
+    0xF0, 0x90, 0xF0, 0x10, 0xF0, // 9
+    0xF0, 0x90, 0xF0, 0x90, 0x90, // A
+    0xE0, 0x90, 0xE0, 0x90, 0xE0, // B
+    0xF0, 0x80, 0x80, 0x80, 0xF0, // C
+    0xE0, 0x90, 0x90, 0x90, 0xE0, // D
+    0xF0, 0x80, 0xF0, 0x80, 0xF0, // E
+    0xF0, 0x80, 0xF0, 0x80, 0x80, // F
 ];
 
 type DrawCallback<'a> = |pixels: &[u8]|: 'a;
@@ -53,7 +53,7 @@ impl <'a> Chip8 <'a> {
     /// ## Arguments ##
     /// * draw_callback - Callback used when drawing
     pub fn new(draw_callback: DrawCallback<'a>) -> Chip8<'a> {
-        Chip8 {
+        let mut ch8 = Chip8 {
             ram: [0u8, .. MEM_SIZE],
             v: [0u8, .. 16],
             i: 0u16,
@@ -64,7 +64,9 @@ impl <'a> Chip8 <'a> {
             stack: [0u16, .. 16],
             display: [0u8, .. DISPLAY_WIDTH * DISPLAY_HEIGHT],
             draw_callback: draw_callback
-        }
+        };
+        copy_memory(ch8.ram.mut_slice(0u, 5 * 0x10), fontset);
+        ch8
     }
 
     /// Load a ROM
@@ -84,8 +86,10 @@ impl <'a> Chip8 <'a> {
         match ins & 0xF000 {
             0x0000 => match ins & 0x0FFF {
                 0x00E0 => self.clear_display(),
+                0x00EE => self.ret_from_subroutine(),
                 _ => self.jump_to_sys_routine(0)
             },
+            0x2000 => self.call_subroutine((ins & 0xFFF) as uint),
             0x1000 => self.jump_addr(ins & 0x0FFF),
             0x3000 => self.skip_next_vx_eq(((ins & 0x0F00) >> 8) as uint, (ins & 0x00FF) as u8),
             0x5000 => match ins & 0x000F {
@@ -108,6 +112,9 @@ impl <'a> Chip8 <'a> {
             0xC000 => self.set_vx_rand_and(((ins & 0x0F00) >> 8) as uint, (ins & 0x00FF) as u8),
             0xD000 => self.display_sprite(((ins & 0x0F00) >> 8) as uint, ((ins & 0x00F0) >> 4) as uint, ((ins & 0x000F)) as uint),
             0xF000 => match ins & 0x00FF {
+                0x000A => self.wait_for_keypress_store_in_vx(((ins & 0x0F00) >> 8) as uint),
+                0x0029 => self.set_i_to_loc_of_digit_vx(((ins & 0x0F00) >> 8) as uint),
+                0x0033 => self.store_bcd_of_vx_to_i(((ins & 0x0F00) >> 8) as uint),
                 0x0055 => self.copy_v0_through_vx_to_mem(((ins & 0x0F00) >> 8) as uint),
                 0x0065 => self.read_v0_through_vx_from_mem(((ins & 0x0F00) >> 8) as uint),
                 0x001E => self.add_vx_to_i(((ins & 0x0F00) >> 8) as uint),
@@ -231,4 +238,68 @@ impl <'a> Chip8 <'a> {
     fn jump_to_sys_routine(&mut self, addr: uint) {
         unimplemented!();
     }
+
+    fn call_subroutine(&mut self, addr: uint) {
+        self.sp += 1;
+        self.stack[self.sp as uint] = self.pc;
+        self.pc = addr as u16;
+    }
+
+    // Fx33 - LD B, Vx
+    // Store BCD representation of Vx in memory locations I, I+1, and I+2.
+    //
+    // The interpreter takes the decimal value of Vx, and places the hundreds
+    // digit in memory at location in I, the tens digit at location I+1,
+    // and the ones digit at location I+2.
+    fn store_bcd_of_vx_to_i(&mut self, x: uint) {
+        let num = self.v[x];
+        let h = num / 100;
+        let t = (num - h * 100) / 10;
+        let o = (num - h * 100 - t * 10);
+        self.ram[self.i as uint] = h;
+        self.ram[self.i as uint + 1] = t;
+        self.ram[self.i as uint + 2] = o;
+    }
+
+    // Fx29 - LD F, Vx
+    // Set I = location of sprite for digit Vx.
+    //
+    // The value of I is set to the location for the hexadecimal sprite
+    // corresponding to the value of Vx. See section 2.4, Display, for more
+    // information on the Chip-8 hexadecimal font.
+    //
+    // For crusty-chip, the fontset is stored at 0x000
+    fn set_i_to_loc_of_digit_vx(&mut self, x: uint) {
+        self.i = (x * 5) as u16;
+    }
+
+    // 00EE - RET
+    // Return from a subroutine.
+    //
+    // The interpreter sets the program counter to the address at the top of
+    // the stack, then subtracts 1 from the stack pointer.
+    fn ret_from_subroutine(&mut self) {
+        self.pc = self.stack[self.sp as uint];
+        self.sp -= 1;
+    }
+
+    // Fx0A - LD Vx, K
+    // Wait for a key press, store the value of the key in Vx.
+    //
+    // All execution stops until a key is pressed, then the value of that key
+    //  is stored in Vx.
+    fn wait_for_keypress_store_in_vx(&mut self, x: uint) {
+        self.pc -= 2;
+    }
+}
+
+#[test]
+fn test_strore_bcd_of_vx_to_i() {
+    let mut ch8 = Chip8::new(|_| {});
+    ch8.v[0] = 146;
+    ch8.i = 0;
+    ch8.store_bcd_of_vx_to_i(0);
+    assert!(ch8.ram[0] == 1);
+    assert!(ch8.ram[1] == 4);
+    assert!(ch8.ram[2] == 6);
 }
