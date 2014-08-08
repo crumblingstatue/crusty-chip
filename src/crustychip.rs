@@ -163,17 +163,20 @@ impl <'a> Chip8 <'a> {
                 0x00A1 => self.skip_next_key_vx_not_pressed(((ins & 0x0F00) >> 8) as uint),
                 _ => fail!("Unknown 0xEXXX instruction: {:x}", ins)
             },
-            0xF000 => match ins & 0x00FF {
-                0x000A => self.wait_for_keypress_store_in_vx(((ins & 0x0F00) >> 8) as uint),
-                0x0007 => self.set_vx_to_delay_timer(((ins & 0x0F00) >> 8) as uint),
-                0x0015 => self.set_delay_timer(((ins & 0x0F00) >> 8) as u8),
-                0x0018 => self.set_sound_timer(((ins & 0x0F00) >> 8) as u8),
-                0x0029 => self.set_i_to_loc_of_digit_vx(((ins & 0x0F00) >> 8) as uint),
-                0x0033 => self.store_bcd_of_vx_to_i(((ins & 0x0F00) >> 8) as uint),
-                0x0055 => self.copy_v0_through_vx_to_mem(((ins & 0x0F00) >> 8) as uint),
-                0x0065 => self.read_v0_through_vx_from_mem(((ins & 0x0F00) >> 8) as uint),
-                0x001E => self.add_vx_to_i(((ins & 0x0F00) >> 8) as uint),
-                _ => fail!("Unknown 0xFXXX instruction: {:x}", ins)
+            0xF000 => {
+                let x = ((ins & 0x0F00) >> 8) as uint;
+                match ins & 0x00FF {
+                    0x000A => self.wait_for_keypress_store_in_vx(x),
+                    0x0007 => self.set_vx_to_delay_timer(x),
+                    0x0015 => self.set_delay_timer(x as u8),
+                    0x0018 => self.set_sound_timer(x as u8),
+                    0x0029 => self.set_i_to_loc_of_digit_vx(x),
+                    0x0033 => self.store_bcd_of_vx_to_i(x),
+                    0x0055 => self.copy_v0_through_vx_to_mem(x),
+                    0x0065 => self.read_v0_through_vx_from_mem(x),
+                    0x001E => self.add_vx_to_i(x),
+                    _ => fail!("Unknown 0xFXXX instruction: {:x}", ins)
+                }
             },
             _ => fail!("Unknown instruction: {:04x}", ins)
         }
