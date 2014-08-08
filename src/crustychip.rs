@@ -59,6 +59,11 @@ static fontset: [u8, .. 5 * 0x10] = [
 /// ```
 pub type DrawCallback<'a> = |pixels: &[u8]|: 'a;
 
+struct KeypressWait {
+    wait: bool,
+    vx: uint
+}
+
 /// CHIP-8 virtual machine
 pub struct Chip8<'a> {
     ram: [u8, .. MEM_SIZE],
@@ -70,7 +75,9 @@ pub struct Chip8<'a> {
     sp: u8,
     stack: [u16, .. 16],
     display: [u8, .. DISPLAY_WIDTH * DISPLAY_HEIGHT],
-    draw_callback: DrawCallback<'a>
+    draw_callback: DrawCallback<'a>,
+    keys: [bool, .. 16],
+    keypress_wait: KeypressWait
 }
 
 impl <'a> Chip8 <'a> {
@@ -90,7 +97,12 @@ impl <'a> Chip8 <'a> {
             sp: 0,
             stack: [0u16, .. 16],
             display: [0u8, .. DISPLAY_WIDTH * DISPLAY_HEIGHT],
-            draw_callback: draw_callback
+            draw_callback: draw_callback,
+            keys: [false, .. 16],
+            keypress_wait: KeypressWait {
+                wait: false,
+                vx: 0
+            }
         };
         copy_memory(ch8.ram.mut_slice(0u, 5 * 0x10), fontset);
         ch8
@@ -107,6 +119,11 @@ impl <'a> Chip8 <'a> {
 
     /// Do an emulation cycle.
     pub fn do_cycle(&mut self) {
+
+        if self.keypress_wait.wait {
+            return;
+        }
+
         let ins = self.get_ins();
         self.pc += 2;
 
@@ -119,6 +136,7 @@ impl <'a> Chip8 <'a> {
             0x2000 => self.call_subroutine((ins & 0xFFF) as uint),
             0x1000 => self.jump_addr(ins & 0x0FFF),
             0x3000 => self.skip_next_vx_eq(((ins & 0x0F00) >> 8) as uint, (ins & 0x00FF) as u8),
+            0x4000 => self.skip_next_vx_ne(((ins & 0x0F00) >> 8) as uint, (ins & 0x00FF) as u8),
             0x5000 => match ins & 0x000F {
                 0x0000 => self.skip_next_vx_eq_vy(((ins & 0x0F00) >> 8) as uint, ((ins & 0x00F0) >> 4) as uint),
                 _ => fail!("Unknown 0x5XXX instruction: {:x}", ins)
@@ -140,6 +158,9 @@ impl <'a> Chip8 <'a> {
             0xD000 => self.display_sprite(((ins & 0x0F00) >> 8) as uint, ((ins & 0x00F0) >> 4) as uint, ((ins & 0x000F)) as uint),
             0xF000 => match ins & 0x00FF {
                 0x000A => self.wait_for_keypress_store_in_vx(((ins & 0x0F00) >> 8) as uint),
+                0x0007 => self.set_vx_to_delay_timer(((ins & 0x0F00) >> 8) as uint),
+                0x0015 => self.set_delay_timer(((ins & 0x0F00) >> 8) as u8),
+                0x0018 => self.set_sound_timer(((ins & 0x0F00) >> 8) as u8),
                 0x0029 => self.set_i_to_loc_of_digit_vx(((ins & 0x0F00) >> 8) as uint),
                 0x0033 => self.store_bcd_of_vx_to_i(((ins & 0x0F00) >> 8) as uint),
                 0x0055 => self.copy_v0_through_vx_to_mem(((ins & 0x0F00) >> 8) as uint),
@@ -169,6 +190,12 @@ impl <'a> Chip8 <'a> {
 
     fn skip_next_vx_eq(&mut self, x: uint, to: u8) {
         if self.v[x] == to {
+            self.pc += 2;
+        }
+    }
+
+    fn skip_next_vx_ne(&mut self, x: uint, to: u8) {
+        if self.v[x] != to {
             self.pc += 2;
         }
     }
@@ -314,9 +341,54 @@ impl <'a> Chip8 <'a> {
     // Wait for a key press, store the value of the key in Vx.
     //
     // All execution stops until a key is pressed, then the value of that key
-    //  is stored in Vx.
+    // is stored in Vx.
     fn wait_for_keypress_store_in_vx(&mut self, x: uint) {
-        self.pc -= 2;
+        self.keypress_wait.wait = true;
+        self.keypress_wait.vx = x;
+    }
+
+    // Fx15 - LD DT, Vx
+    // Set delay timer = Vx.
+    //
+    // DT is set equal to the value of Vx.
+    fn set_delay_timer(&mut self, x: u8) {
+        self.delay_timer = x;
+    }
+
+    // Fx18 - LD ST, Vx
+    // Set sound timer = Vx.
+    //
+    // ST is set equal to the value of Vx.
+    fn set_sound_timer(&mut self, x: u8) {
+        self.sound_timer = x;
+    }
+
+    // Fx07 - LD Vx, DT
+    // Set Vx = delay timer value.
+    //
+    // The value of DT is placed into Vx.
+    fn set_vx_to_delay_timer(&mut self, x: uint) {
+        self.v[x] = self.delay_timer;
+    }
+
+    /// Press a key on the hexadecimal keypad
+    ///
+    /// `key` should be in the range `0..15`
+    pub fn press_key(&mut self, key: uint) {
+        assert!(key >= 0 && key <= 15);
+        self.keys[key] = true;
+        if self.keypress_wait.wait {
+            self.v[self.keypress_wait.vx] = key as u8;
+            self.keypress_wait.wait = false;
+        }
+    }
+
+    /// Release a key on the hexadecimal keypad
+    ///
+    /// `key` should be in the range `0..15`
+    pub fn release_key(&mut self, key: uint) {
+        assert!(key >= 0 && key <= 15);
+        self.keys[key] = false;
     }
 }
 
