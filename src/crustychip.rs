@@ -131,6 +131,7 @@ impl <'a> Chip8 <'a> {
     // Decode instruction and execute it
     fn dispatch(&mut self, ins: u16) {
         let nnn = ins & 0x0FFF;
+        let x = (ins & 0x0F00) >> 8;
         match ins & 0xF000 {
             0x0000 => match nnn {
                 0x00E0 => self.clear_display(),
@@ -139,50 +140,48 @@ impl <'a> Chip8 <'a> {
             },
             0x2000 => self.call_subroutine(nnn as uint),
             0x1000 => self.jump_addr(nnn),
-            0x3000 => self.skip_next_vx_eq(((ins & 0x0F00) >> 8) as uint, (ins & 0x00FF) as u8),
-            0x4000 => self.skip_next_vx_ne(((ins & 0x0F00) >> 8) as uint, (ins & 0x00FF) as u8),
+            0x3000 => self.skip_next_vx_eq(x as uint, (ins & 0x00FF) as u8),
+            0x4000 => self.skip_next_vx_ne(x as uint, (ins & 0x00FF) as u8),
             0x5000 => match ins & 0x000F {
-                0x0000 => self.skip_next_vx_eq_vy(((ins & 0x0F00) >> 8) as uint, ((ins & 0x00F0) >> 4) as uint),
+                0x0000 => self.skip_next_vx_eq_vy(x as uint, ((ins & 0x00F0) >> 4) as uint),
                 _ => fail!("Unknown 0x5XXX instruction: {:x}", ins)
             },
-            0x6000 => self.set_vx_byte(((ins & 0x0F00) >> 8) as uint, (ins & 0x00FF) as u8),
-            0x7000 => self.add_vx_byte(((ins & 0x0F00) >> 8) as uint, (ins & 0x00FF) as u8),
+            0x6000 => self.set_vx_byte(x as uint, (ins & 0x00FF) as u8),
+            0x7000 => self.add_vx_byte(x as uint, (ins & 0x00FF) as u8),
             0x8000 => {
-                let x = ((ins & 0x0F00) >> 8) as uint;
                 let y = ((ins & 0x00F0) >> 4) as uint;
                 match ins & 0x000F {
-                    0x0000 => self.set_vx_to_vy(x, y),
-                    0x0002 => self.set_vx_to_vx_and_vy(x, y),
-                    0x0003 => self.set_vx_to_vx_xor_vy(x, y),
-                    0x0004 => self.add_vx_vy(x, y),
-                    0x0005 => self.sub_vx_vy(x, y),
-                    0x000E => self.set_vx_to_vx_shl_1(x),
+                    0x0000 => self.set_vx_to_vy(x as uint, y),
+                    0x0002 => self.set_vx_to_vx_and_vy(x as uint, y),
+                    0x0003 => self.set_vx_to_vx_xor_vy(x as uint, y),
+                    0x0004 => self.add_vx_vy(x as uint, y),
+                    0x0005 => self.sub_vx_vy(x as uint, y),
+                    0x000E => self.set_vx_to_vx_shl_1(x as uint),
                     _ => fail!("Unknown 0x8XXX instruction: {:x}", ins)
                 }
             },
             0x9000 => match ins & 0x000F {
-                0x0000 => self.skip_next_vx_ne_vy(((ins & 0x0F00) >> 8) as uint, ((ins & 0x00F0) >> 4) as uint),
+                0x0000 => self.skip_next_vx_ne_vy(x as uint, ((ins & 0x00F0) >> 4) as uint),
                 _ => fail!("Unknown 0x9XXX instruction: {:x}", ins)
             },
             0xA000 => self.set_i(nnn),
-            0xC000 => self.set_vx_rand_and(((ins & 0x0F00) >> 8) as uint, (ins & 0x00FF) as u8),
-            0xD000 => self.display_sprite(((ins & 0x0F00) >> 8) as uint, ((ins & 0x00F0) >> 4) as uint, ((ins & 0x000F)) as uint),
+            0xC000 => self.set_vx_rand_and(x as uint, (ins & 0x00FF) as u8),
+            0xD000 => self.display_sprite(x as uint, ((ins & 0x00F0) >> 4) as uint, ((ins & 0x000F)) as uint),
             0xE000 => match ins & 0x00FF {
-                0x00A1 => self.skip_next_key_vx_not_pressed(((ins & 0x0F00) >> 8) as uint),
+                0x00A1 => self.skip_next_key_vx_not_pressed(x as uint),
                 _ => fail!("Unknown 0xEXXX instruction: {:x}", ins)
             },
             0xF000 => {
-                let x = ((ins & 0x0F00) >> 8) as uint;
                 match ins & 0x00FF {
-                    0x000A => self.wait_for_keypress_store_in_vx(x),
-                    0x0007 => self.set_vx_to_delay_timer(x),
+                    0x000A => self.wait_for_keypress_store_in_vx(x as uint),
+                    0x0007 => self.set_vx_to_delay_timer(x as uint),
                     0x0015 => self.set_delay_timer(x as u8),
                     0x0018 => self.set_sound_timer(x as u8),
-                    0x0029 => self.set_i_to_loc_of_digit_vx(x),
-                    0x0033 => self.store_bcd_of_vx_to_i(x),
-                    0x0055 => self.copy_v0_through_vx_to_mem(x),
-                    0x0065 => self.read_v0_through_vx_from_mem(x),
-                    0x001E => self.add_vx_to_i(x),
+                    0x0029 => self.set_i_to_loc_of_digit_vx(x as uint),
+                    0x0033 => self.store_bcd_of_vx_to_i(x as uint),
+                    0x0055 => self.copy_v0_through_vx_to_mem(x as uint),
+                    0x0065 => self.read_v0_through_vx_from_mem(x as uint),
+                    0x001E => self.add_vx_to_i(x as uint),
                     _ => fail!("Unknown 0xFXXX instruction: {:x}", ins)
                 }
             },
