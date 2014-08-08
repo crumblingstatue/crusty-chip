@@ -143,14 +143,18 @@ impl <'a> Chip8 <'a> {
             },
             0x6000 => self.set_vx_byte(((ins & 0x0F00) >> 8) as uint, (ins & 0x00FF) as u8),
             0x7000 => self.add_vx_byte(((ins & 0x0F00) >> 8) as uint, (ins & 0x00FF) as u8),
-            0x8000 => match ins & 0x000F {
-                0x0000 => self.set_vx_to_vy(((ins & 0x0F00) >> 8) as uint, ((ins & 0x00F0) >> 4) as uint),
-                0x0002 => self.set_vx_to_vx_and_vy(((ins & 0x0F00) >> 8) as uint, ((ins & 0x00F0) >> 4) as uint),
-                0x0003 => self.set_vx_to_vx_xor_vy(((ins & 0x0F00) >> 8) as uint, ((ins & 0x00F0) >> 4) as uint),
-                0x0004 => self.add_vx_vy(((ins & 0x0F00) >> 8) as uint, ((ins & 0x00F0) >> 4) as uint),
-                0x0005 => self.sub_vx_vy(((ins & 0x0F00) >> 8) as uint, ((ins & 0x00F0) >> 4) as uint),
-                0x000E => self.set_vx_to_vx_shl_1(((ins & 0x0F00) >> 8) as uint),
-                _ => fail!("Unknown 0x8XXX instruction: {:x}", ins)
+            0x8000 => {
+                let x = ((ins & 0x0F00) >> 8) as uint;
+                let y = ((ins & 0x00F0) >> 4) as uint;
+                match ins & 0x000F {
+                    0x0000 => self.set_vx_to_vy(x, y),
+                    0x0002 => self.set_vx_to_vx_and_vy(x, y),
+                    0x0003 => self.set_vx_to_vx_xor_vy(x, y),
+                    0x0004 => self.add_vx_vy(x, y),
+                    0x0005 => self.sub_vx_vy(x, y),
+                    0x000E => self.set_vx_to_vx_shl_1(x),
+                    _ => fail!("Unknown 0x8XXX instruction: {:x}", ins)
+                }
             },
             0x9000 => match ins & 0x000F {
                 0x0000 => self.skip_next_vx_ne_vy(((ins & 0x0F00) >> 8) as uint, ((ins & 0x00F0) >> 4) as uint),
