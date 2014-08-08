@@ -145,8 +145,10 @@ impl <'a> Chip8 <'a> {
             0x7000 => self.add_vx_byte(((ins & 0x0F00) >> 8) as uint, (ins & 0x00FF) as u8),
             0x8000 => match ins & 0x000F {
                 0x0000 => self.set_vx_to_vy(((ins & 0x0F00) >> 8) as uint, ((ins & 0x00F0) >> 4) as uint),
+                0x0003 => self.set_vx_to_vx_xor_vy(((ins & 0x0F00) >> 8) as uint, ((ins & 0x00F0) >> 4) as uint),
                 0x0004 => self.add_vx_vy(((ins & 0x0F00) >> 8) as uint, ((ins & 0x00F0) >> 4) as uint),
                 0x0005 => self.sub_vx_vy(((ins & 0x0F00) >> 8) as uint, ((ins & 0x00F0) >> 4) as uint),
+                0x000E => self.set_vx_to_vx_shl_1(((ins & 0x0F00) >> 8) as uint),
                 _ => fail!("Unknown 0x8XXX instruction: {:x}", ins)
             },
             0x9000 => match ins & 0x000F {
@@ -371,6 +373,27 @@ impl <'a> Chip8 <'a> {
         self.v[x] = self.delay_timer;
     }
 
+    // 8xy3 - XOR Vx, Vy
+    // Set Vx = Vx XOR Vy.
+    //
+    // Performs a bitwise exclusive OR on the values of Vx and Vy, then stores
+    // the result in Vx. An exclusive OR compares the corrseponding bits from
+    // two values, and if the bits are not both the same, then the
+    // corresponding bit in the result is set to 1. Otherwise, it is 0.
+    pub fn set_vx_to_vx_xor_vy(&mut self, x: uint, y: uint) {
+        self.v[x] ^= self.v[y];
+    }
+
+    // 8xyE - SHL Vx {, Vy}
+    // Set Vx = Vx SHL 1.
+    //
+    // If the most-significant bit of Vx is 1, then VF is set to 1, otherwise
+    // to 0. Then Vx is multiplied by 2.
+    pub fn set_vx_to_vx_shl_1(&mut self, x: uint) {
+        // TODO: Is this just a left shift by 1?
+        self.v[x] <<= 1;
+    }
+
     /// Press a key on the hexadecimal keypad
     ///
     /// `key` should be in the range `0..15`
@@ -389,6 +412,18 @@ impl <'a> Chip8 <'a> {
     pub fn release_key(&mut self, key: uint) {
         assert!(key >= 0 && key <= 15);
         self.keys[key] = false;
+    }
+
+    /// Decrement the sound and delay timers
+    ///
+    /// They should be decremented at a rate of 60 Hz
+    pub fn decrement_timers(&mut self) {
+        if self.delay_timer > 0 {
+            self.delay_timer -= 1;
+        }
+        if self.sound_timer > 0 {
+            self.sound_timer -= 1;
+        }
     }
 }
 
