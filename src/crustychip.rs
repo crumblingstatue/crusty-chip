@@ -132,6 +132,7 @@ impl <'a> Chip8 <'a> {
     fn dispatch(&mut self, ins: u16) {
         let nnn = ins & 0x0FFF;
         let x = (ins & 0x0F00) >> 8;
+        let kk = (ins & 0x00FF) as u8;
         match ins & 0xF000 {
             0x0000 => match nnn {
                 0x00E0 => self.clear_display(),
@@ -140,14 +141,14 @@ impl <'a> Chip8 <'a> {
             },
             0x2000 => self.call_subroutine(nnn as uint),
             0x1000 => self.jump_addr(nnn),
-            0x3000 => self.skip_next_vx_eq(x as uint, (ins & 0x00FF) as u8),
-            0x4000 => self.skip_next_vx_ne(x as uint, (ins & 0x00FF) as u8),
+            0x3000 => self.skip_next_vx_eq(x as uint, kk),
+            0x4000 => self.skip_next_vx_ne(x as uint, kk),
             0x5000 => match ins & 0x000F {
                 0x0000 => self.skip_next_vx_eq_vy(x as uint, ((ins & 0x00F0) >> 4) as uint),
                 _ => fail!("Unknown 0x5XXX instruction: {:x}", ins)
             },
-            0x6000 => self.set_vx_byte(x as uint, (ins & 0x00FF) as u8),
-            0x7000 => self.add_vx_byte(x as uint, (ins & 0x00FF) as u8),
+            0x6000 => self.set_vx_byte(x as uint, kk),
+            0x7000 => self.add_vx_byte(x as uint, kk),
             0x8000 => {
                 let y = ((ins & 0x00F0) >> 4) as uint;
                 match ins & 0x000F {
@@ -165,7 +166,7 @@ impl <'a> Chip8 <'a> {
                 _ => fail!("Unknown 0x9XXX instruction: {:x}", ins)
             },
             0xA000 => self.set_i(nnn),
-            0xC000 => self.set_vx_rand_and(x as uint, (ins & 0x00FF) as u8),
+            0xC000 => self.set_vx_rand_and(x as uint, kk),
             0xD000 => self.display_sprite(x as uint, ((ins & 0x00F0) >> 4) as uint, ((ins & 0x000F)) as uint),
             0xE000 => match ins & 0x00FF {
                 0x00A1 => self.skip_next_key_vx_not_pressed(x as uint),
