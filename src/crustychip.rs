@@ -196,14 +196,14 @@ impl <'a> Chip8 <'a> {
         if x == 0 {
             return;
         }
-        copy_memory(self.ram.mut_slice(self.i as uint, x), self.v.slice(0, x));
+        copy_memory(self.ram.mut_slice(self.i as uint, self.i as uint + x), self.v.slice(0, x));
     }
 
     fn read_v0_through_vx_from_mem(&mut self, x: uint) {
         if x == 0 {
             return;
         }
-        copy_memory(self.v.mut_slice(0, x), self.ram.slice(self.i as uint, x));
+        copy_memory(self.v.mut_slice(0, x), self.ram.slice(self.i as uint, self.i as uint + x));
     }
 
     fn skip_next_vx_eq_vy(&mut self, x: uint, y: uint) {
