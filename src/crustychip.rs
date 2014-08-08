@@ -380,7 +380,7 @@ impl <'a> Chip8 <'a> {
     // the result in Vx. An exclusive OR compares the corrseponding bits from
     // two values, and if the bits are not both the same, then the
     // corresponding bit in the result is set to 1. Otherwise, it is 0.
-    pub fn set_vx_to_vx_xor_vy(&mut self, x: uint, y: uint) {
+    fn set_vx_to_vx_xor_vy(&mut self, x: uint, y: uint) {
         self.v[x] ^= self.v[y];
     }
 
@@ -389,7 +389,7 @@ impl <'a> Chip8 <'a> {
     //
     // If the most-significant bit of Vx is 1, then VF is set to 1, otherwise
     // to 0. Then Vx is multiplied by 2.
-    pub fn set_vx_to_vx_shl_1(&mut self, x: uint) {
+    fn set_vx_to_vx_shl_1(&mut self, x: uint) {
         // TODO: Is this just a left shift by 1?
         self.v[x] <<= 1;
     }
