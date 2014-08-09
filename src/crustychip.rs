@@ -3,6 +3,10 @@
 //!
 //! The reference frontend is
 //! [crusty-chip-sfml](https://github.com/crumblingstatue/crusty-chip-sfml).
+//!
+//! The CHIP-8 technical documentation in the comments is copied from
+//! http://devernay.free.fr/hacks/chip8/C8TECH10.HTM,
+//! Copyright (c) Thomas P. Greene.
 
 use std::slice::bytes::copy_memory;
 
@@ -198,6 +202,110 @@ impl <'a> Chip8 <'a> {
         }
     }
 
+    // 0nnn - SYS addr
+    // Jump to a machine code routine at nnn.
+    //
+    // This instruction is only used on the old computers on which Chip-8 was
+    // originally implemented. It is ignored by modern interpreters.
+    fn jump_to_sys_routine(&mut self, addr: uint) {
+        // Do nothing
+    }
+
+    // 00E0 - CLS
+    // Clear the display.
+    fn clear_display(&mut self) {
+        for px in self.display.mut_iter() {
+            *px = 0;
+        }
+    }
+
+    // 00EE - RET
+    // Return from a subroutine.
+    //
+    // The interpreter sets the program counter to the address at the top of
+    // the stack, then subtracts 1 from the stack pointer.
+    fn ret_from_subroutine(&mut self) {
+        self.pc = self.stack[self.sp as uint];
+        self.sp -= 1;
+    }
+
+    // 1nnn - JP addr
+    // Jump to location nnn.
+    //
+    // The interpreter sets the program counter to nnn.
+    fn jump_addr(&mut self, addr: u16) {
+        self.pc = addr;
+    }
+
+    // 2nnn - CALL addr
+    // Call subroutine at nnn.
+    //
+    // The interpreter increments the stack pointer, then puts the current PC
+    // on the top of the stack. The PC is then set to nnn.
+    fn call_subroutine(&mut self, addr: uint) {
+        self.sp += 1;
+        self.stack[self.sp as uint] = self.pc;
+        self.pc = addr as u16;
+    }
+
+    // 3xkk - SE Vx, byte
+    // Skip next instruction if Vx = kk.
+    //
+    // The interpreter compares register Vx to kk, and if they are equal,
+    // increments the program counter by 2.
+    fn skip_next_vx_eq(&mut self, x: uint, to: u8) {
+        if self.v[x] == to {
+            self.pc += 2;
+        }
+    }
+
+    // 4xkk - SNE Vx, byte
+    // Skip next instruction if Vx != kk.
+    //
+    // The interpreter compares register Vx to kk, and if they are not equal,
+    // increments the program counter by 2.
+    fn skip_next_vx_ne(&mut self, x: uint, to: u8) {
+        if self.v[x] != to {
+            self.pc += 2;
+        }
+    }
+
+    // 5xy0 - SE Vx, Vy
+    // Skip next instruction if Vx = Vy.
+    //
+    // The interpreter compares register Vx to register Vy, and if they are
+    // equal, increments the program counter by 2.
+    fn skip_next_vx_eq_vy(&mut self, x: uint, y: uint) {
+        if self.v[x] == self.v[y] {
+            self.pc += 2;
+        }
+    }
+
+    // 6xkk - LD Vx, byte
+    // Set Vx = kk.
+    //
+    // The interpreter puts the value kk into register Vx.
+    fn set_vx_byte(&mut self, x: uint, byte: u8) {
+        self.v[x] = byte;
+    }
+
+    // 7xkk - ADD Vx, byte
+    // Set Vx = Vx + kk.
+    //
+    // Adds the value kk to the value of register Vx, then stores the
+    // result in Vx.
+    fn add_vx_byte(&mut self, x: uint, byte: u8) {
+        self.v[x] += byte;
+    }
+
+    // 8xy0 - LD Vx, Vy
+    // Set Vx = Vy.
+    //
+    // Stores the value of register Vy in register Vx.
+    fn set_vx_to_vy(&mut self, x: uint, y: uint) {
+        self.v[x] = self.v[y];
+    }
+
     fn get_ins(&self) -> u16 {
         let b1 = self.ram[self.pc as uint];
         let b2 = self.ram[(self.pc + 1) as uint];
@@ -212,18 +320,6 @@ impl <'a> Chip8 <'a> {
         use std::rand::{task_rng, Rng};
         let mut rgen = task_rng();
         self.v[x] = rgen.gen::<u8>() & to;
-    }
-
-    fn skip_next_vx_eq(&mut self, x: uint, to: u8) {
-        if self.v[x] == to {
-            self.pc += 2;
-        }
-    }
-
-    fn skip_next_vx_ne(&mut self, x: uint, to: u8) {
-        if self.v[x] != to {
-            self.pc += 2;
-        }
     }
 
     fn display_sprite(&mut self, vx: uint, vy: uint, n: uint) {
@@ -250,22 +346,6 @@ impl <'a> Chip8 <'a> {
         }
 
         (self.draw_callback)(self.display);
-    }
-
-    fn add_vx_byte(&mut self, x: uint, byte: u8) {
-        self.v[x] += byte;
-    }
-
-    fn set_vx_byte(&mut self, x: uint, byte: u8) {
-        self.v[x] = byte;
-    }
-
-    fn jump_addr(&mut self, addr: u16) {
-        self.pc = addr;
-    }
-
-    fn set_vx_to_vy(&mut self, x: uint, y: uint) {
-        self.v[x] = self.v[y];
     }
 
     fn add_vx_vy(&mut self, x: uint, y: uint) {
@@ -299,32 +379,10 @@ impl <'a> Chip8 <'a> {
                     self.ram.slice(self.i as uint, self.i as uint + x));
     }
 
-    fn skip_next_vx_eq_vy(&mut self, x: uint, y: uint) {
-        if self.v[x] == self.v[y] {
-            self.pc += 2;
-        }
-    }
-
     fn skip_next_vx_ne_vy(&mut self, x: uint, y: uint) {
         if self.v[x] != self.v[y] {
             self.pc += 2;
         }
-    }
-
-    fn clear_display(&mut self) {
-        for px in self.display.mut_iter() {
-            *px = 0;
-        }
-    }
-
-    fn jump_to_sys_routine(&mut self, addr: uint) {
-        unimplemented!();
-    }
-
-    fn call_subroutine(&mut self, addr: uint) {
-        self.sp += 1;
-        self.stack[self.sp as uint] = self.pc;
-        self.pc = addr as u16;
     }
 
     // Fx33 - LD B, Vx
@@ -353,16 +411,6 @@ impl <'a> Chip8 <'a> {
     // For crusty-chip, the fontset is stored at 0x000
     fn set_i_to_loc_of_digit_vx(&mut self, x: uint) {
         self.i = (self.v[x] * 5) as u16;
-    }
-
-    // 00EE - RET
-    // Return from a subroutine.
-    //
-    // The interpreter sets the program counter to the address at the top of
-    // the stack, then subtracts 1 from the stack pointer.
-    fn ret_from_subroutine(&mut self) {
-        self.pc = self.stack[self.sp as uint];
-        self.sp -= 1;
     }
 
     // Fx0A - LD Vx, K
