@@ -147,8 +147,8 @@ impl <'a> Chip8 <'a> {
                 0x0EE => self.ret_from_subroutine(),
                 _ => self.jump_to_sys_routine(0)
             },
-            0x2 => self.call_subroutine(nnn as uint),
             0x1 => self.jump_addr(nnn),
+            0x2 => self.call_subroutine(nnn as uint),
             0x3 => self.skip_next_vx_eq(x as uint, kk),
             0x4 => self.skip_next_vx_ne(x as uint, kk),
             0x5 => match n {
@@ -186,11 +186,11 @@ impl <'a> Chip8 <'a> {
                     0x07 => self.set_vx_to_delay_timer(x as uint),
                     0x15 => self.set_delay_timer(x as u8),
                     0x18 => self.set_sound_timer(x as u8),
+                    0x1E => self.add_vx_to_i(x as uint),
                     0x29 => self.set_i_to_loc_of_digit_vx(x as uint),
                     0x33 => self.store_bcd_of_vx_to_i(x as uint),
                     0x55 => self.copy_v0_through_vx_to_mem(x as uint),
                     0x65 => self.read_v0_through_vx_from_mem(x as uint),
-                    0x1E => self.add_vx_to_i(x as uint),
                     _ => fail!("Unknown 0xFXXX instruction: {:x}", ins)
                 }
             },
