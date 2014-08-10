@@ -362,11 +362,9 @@ pub fn store_bcd_of_vx_to_i(ch8: &mut Chip8, x: uint) {
 // The interpreter copies the values of registers V0 through Vx into memory,
 // starting at the address in I.
 pub fn copy_v0_through_vx_to_mem(ch8: &mut Chip8, x: uint) {
-    if x == 0 {
-        return;
+    for i in range (0, x + 1) {
+        ch8.ram[(ch8.i + i as u16) as uint] = ch8.v[i];
     }
-    copy_memory(ch8.ram.mut_slice(ch8.i as uint, ch8.i as uint + x),
-                ch8.v.slice(0, x));
 }
 
 // Fx65 - LD Vx, [I]
@@ -375,11 +373,9 @@ pub fn copy_v0_through_vx_to_mem(ch8: &mut Chip8, x: uint) {
 // The interpreter reads values from memory starting at location I into
 // registers V0 through Vx.
 pub fn read_v0_through_vx_from_mem(ch8: &mut Chip8, x: uint) {
-    if x == 0 {
-        return;
+    for i in range(0, x + 1) {
+        ch8.v[i] = ch8.ram[(ch8.i + i as u16) as uint];
     }
-    copy_memory(ch8.v.mut_slice(0, x),
-                ch8.ram.slice(ch8.i as uint, ch8.i as uint + x));
 }
 
 #[test]
