@@ -129,8 +129,7 @@ impl <'a> Chip8 <'a> {
             return;
         }
 
-        let ins = self.get_ins();
-        self.pc += 2;
+        let ins = self.fetch_ins();
         self.dispatch(ins);
     }
 
@@ -203,10 +202,11 @@ impl <'a> Chip8 <'a> {
             _ => fail!("Unknown instruction: {:04x}", ins)
         }
     }
-    
-    fn get_ins(&self) -> u16 {
+
+    fn fetch_ins(&mut self) -> u16 {
         let b1 = self.ram[self.pc as uint];
         let b2 = self.ram[(self.pc + 1) as uint];
+        self.pc += 2;
         b1 as u16 << 8 | b2 as u16
     }
 
