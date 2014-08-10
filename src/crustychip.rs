@@ -170,6 +170,7 @@ impl <'a> Chip8 <'a> {
                     0x3 => ops::set_vx_to_vx_xor_vy(self, x, y),
                     0x4 => ops::add_vx_vy(self, x, y),
                     0x5 => ops::sub_vx_vy(self, x, y),
+                    0x6 => ops::set_vx_to_vx_shr_1(self, x),
                     0xE => ops::set_vx_to_vx_shl_1(self, x),
                     _ => fail!("Unknown 0x8XXX instruction: {:x}", ins)
                 }

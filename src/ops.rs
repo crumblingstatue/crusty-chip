@@ -149,6 +149,16 @@ pub fn sub_vx_vy(ch8: &mut Chip8, x: uint, y: uint) {
     ch8.v[x] -= ch8.v[y];
 }
 
+// 8xy6 - SHR Vx {, Vy}
+// Set Vx = Vx SHR 1.
+//
+// If the least-significant bit of Vx is 1, then VF is set to 1, otherwise 0.
+// Then Vx is divided by 2.
+pub fn set_vx_to_vx_shr_1(ch8: &mut Chip8, x: uint) {
+    ch8.v[0xF] = if check_bit(ch8.v[x], 0) {1} else {0};
+    ch8.v[x] /= 2;
+}
+
 // 8xyE - SHL Vx {, Vy}
 // Set Vx = Vx SHL 1.
 //
