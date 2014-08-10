@@ -242,14 +242,3 @@ impl <'a> Chip8 <'a> {
         }
     }
 }
-
-#[test]
-fn test_strore_bcd_of_vx_to_i() {
-    let mut ch8 = Chip8::new(|_| {});
-    ch8.v[0] = 146;
-    ch8.i = 0;
-    ch8.store_bcd_of_vx_to_i(0);
-    assert!(ch8.ram[0] == 1);
-    assert!(ch8.ram[1] == 4);
-    assert!(ch8.ram[2] == 6);
-}

@@ -283,3 +283,14 @@ pub fn skip_next_key_vx_not_pressed(ch8: &mut Chip8, x: uint) {
         ch8.pc += 2;
     }
 }
+
+#[test]
+fn test_strore_bcd_of_vx_to_i() {
+    let mut ch8 = Chip8::new(|_| {});
+    ch8.v[0] = 146;
+    ch8.i = 0;
+    store_bcd_of_vx_to_i(&mut ch8, 0);
+    assert!(ch8.ram[0] == 1);
+    assert!(ch8.ram[1] == 4);
+    assert!(ch8.ram[2] == 6);
+}
