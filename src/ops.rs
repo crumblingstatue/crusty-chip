@@ -178,17 +178,51 @@ fn test_check_bit() {
     assert!(check_bit(0b00000001, 0));
 }
 
+// 9xy0 - SNE Vx, Vy
+// Skip next instruction if Vx != Vy.
+//
+// The values of Vx and Vy are compared, and if they are not equal,
+// the program counter is increased by 2.
+pub fn skip_next_vx_ne_vy(ch8: &mut Chip8, x: uint, y: uint) {
+    if ch8.v[x] != ch8.v[y] {
+        ch8.pc += 2;
+    }
+}
+
+// Annn - LD I, addr
+// Set I = nnn.
+//
+// The value of register I is set to nnn.
 pub fn set_i(ch8: &mut Chip8, to: u16) {
     ch8.i = to;
 }
 
+// Cxkk - RND Vx, byte
+// Set Vx = random byte AND kk.
+//
+// The interpreter generates a random number from 0 to 255, which is then ANDed
+// with the value kk. The results are stored in Vx.
+// See instruction 8xy2 for more information on AND.
 pub fn set_vx_rand_and(ch8: &mut Chip8, x: uint, to: u8) {
     use std::rand::{task_rng, Rng};
     let mut rgen = task_rng();
     ch8.v[x] = rgen.gen::<u8>() & to;
 }
 
+// Dxyn - DRW Vx, Vy, nibble
+// Display n-byte sprite starting at memory location I at (Vx, Vy),
+// set VF = collision.
+//
+// The interpreter reads n bytes from memory, starting at the address stored in
+// I. These bytes are then displayed as sprites on screen at coordinates
+// (Vx, Vy). Sprites are XORed onto the existing screen. If this causes any
+// pixels to be erased, VF is set to 1, otherwise it is set to 0. If the sprite
+// is positioned so part of it is outside the coordinates of the display, it
+// wraps around to the opposite side of the screen. See instruction 8xy3 for
+// more information on XOR, and section 2.4, Display, for more information on
+// the Chip-8 screen and sprites.
 pub fn display_sprite(ch8: &mut Chip8, vx: uint, vy: uint, n: uint) {
+    // TODO: Implement setting VF if collision occurs
     use super::{ DISPLAY_WIDTH, DISPLAY_HEIGHT };
     let x_off = ch8.v[vx] as uint;
     let y_off = ch8.v[vy] as uint * DISPLAY_WIDTH;
@@ -215,58 +249,23 @@ pub fn display_sprite(ch8: &mut Chip8, vx: uint, vy: uint, n: uint) {
     (ch8.draw_callback)(ch8.display);
 }
 
-pub fn add_vx_to_i(ch8: &mut Chip8, x: uint) {
-    ch8.i += x as u16;
-}
-
-pub fn copy_v0_through_vx_to_mem(ch8: &mut Chip8, x: uint) {
-    if x == 0 {
-        return;
-    }
-    copy_memory(ch8.ram.mut_slice(ch8.i as uint, ch8.i as uint + x),
-                ch8.v.slice(0, x));
-}
-
-pub fn read_v0_through_vx_from_mem(ch8: &mut Chip8, x: uint) {
-    if x == 0 {
-        return;
-    }
-    copy_memory(ch8.v.mut_slice(0, x),
-                ch8.ram.slice(ch8.i as uint, ch8.i as uint + x));
-}
-
-pub fn skip_next_vx_ne_vy(ch8: &mut Chip8, x: uint, y: uint) {
-    if ch8.v[x] != ch8.v[y] {
+// ExA1 - SKNP Vx
+// Skip next instruction if key with the value of Vx is not pressed.
+//
+// Checks the keyboard, and if the key corresponding to the value of
+// Vx is currently in the up position, PC is increased by 2.
+pub fn skip_next_key_vx_not_pressed(ch8: &mut Chip8, x: uint) {
+    if !ch8.keys[ch8.v[x] as uint] {
         ch8.pc += 2;
     }
 }
 
-// Fx33 - LD B, Vx
-// Store BCD representation of Vx in memory locations I, I+1, and I+2.
+// Fx07 - LD Vx, DT
+// Set Vx = delay timer value.
 //
-// The interpreter takes the decimal value of Vx, and places the hundreds
-// digit in memory at location in I, the tens digit at location I+1,
-// and the ones digit at location I+2.
-pub fn store_bcd_of_vx_to_i(ch8: &mut Chip8, x: uint) {
-    let num = ch8.v[x];
-    let h = num / 100;
-    let t = (num - h * 100) / 10;
-    let o = (num - h * 100 - t * 10);
-    ch8.ram[ch8.i as uint] = h;
-    ch8.ram[ch8.i as uint + 1] = t;
-    ch8.ram[ch8.i as uint + 2] = o;
-}
-
-// Fx29 - LD F, Vx
-// Set I = location of sprite for digit Vx.
-//
-// The value of I is set to the location for the hexadecimal sprite
-// corresponding to the value of Vx. See section 2.4, Display, for more
-// information on the Chip-8 hexadecimal font.
-//
-// For crusty-chip, the fontset is stored at 0x000
-pub fn set_i_to_loc_of_digit_vx(ch8: &mut Chip8, x: uint) {
-    ch8.i = (ch8.v[x] * 5) as u16;
+// The value of DT is placed into Vx.
+pub fn set_vx_to_delay_timer(ch8: &mut Chip8, x: uint) {
+    ch8.v[x] = ch8.delay_timer;
 }
 
 // Fx0A - LD Vx, K
@@ -295,23 +294,66 @@ pub fn set_sound_timer(ch8: &mut Chip8, x: u8) {
     ch8.sound_timer = x;
 }
 
-// Fx07 - LD Vx, DT
-// Set Vx = delay timer value.
+// Fx1E - ADD I, Vx
+// Set I = I + Vx.
 //
-// The value of DT is placed into Vx.
-pub fn set_vx_to_delay_timer(ch8: &mut Chip8, x: uint) {
-    ch8.v[x] = ch8.delay_timer;
+// The values of I and Vx are added, and the results are stored in I.
+pub fn add_vx_to_i(ch8: &mut Chip8, x: uint) {
+    ch8.i += x as u16;
 }
 
-// ExA1 - SKNP Vx
-// Skip next instruction if key with the value of Vx is not pressed.
+// Fx29 - LD F, Vx
+// Set I = location of sprite for digit Vx.
 //
-// Checks the keyboard, and if the key corresponding to the value of
-// Vx is currently in the up position, PC is increased by 2.
-pub fn skip_next_key_vx_not_pressed(ch8: &mut Chip8, x: uint) {
-    if !ch8.keys[ch8.v[x] as uint] {
-        ch8.pc += 2;
+// The value of I is set to the location for the hexadecimal sprite
+// corresponding to the value of Vx. See section 2.4, Display, for more
+// information on the Chip-8 hexadecimal font.
+//
+// For crusty-chip, the fontset is stored at 0x000
+pub fn set_i_to_loc_of_digit_vx(ch8: &mut Chip8, x: uint) {
+    ch8.i = (ch8.v[x] * 5) as u16;
+}
+
+// Fx33 - LD B, Vx
+// Store BCD representation of Vx in memory locations I, I+1, and I+2.
+//
+// The interpreter takes the decimal value of Vx, and places the hundreds
+// digit in memory at location in I, the tens digit at location I+1,
+// and the ones digit at location I+2.
+pub fn store_bcd_of_vx_to_i(ch8: &mut Chip8, x: uint) {
+    let num = ch8.v[x];
+    let h = num / 100;
+    let t = (num - h * 100) / 10;
+    let o = (num - h * 100 - t * 10);
+    ch8.ram[ch8.i as uint] = h;
+    ch8.ram[ch8.i as uint + 1] = t;
+    ch8.ram[ch8.i as uint + 2] = o;
+}
+
+// Fx55 - LD [I], Vx
+// Store registers V0 through Vx in memory starting at location I.
+//
+// The interpreter copies the values of registers V0 through Vx into memory,
+// starting at the address in I.
+pub fn copy_v0_through_vx_to_mem(ch8: &mut Chip8, x: uint) {
+    if x == 0 {
+        return;
     }
+    copy_memory(ch8.ram.mut_slice(ch8.i as uint, ch8.i as uint + x),
+                ch8.v.slice(0, x));
+}
+
+// Fx65 - LD Vx, [I]
+// Read registers V0 through Vx from memory starting at location I.
+//
+// The interpreter reads values from memory starting at location I into
+// registers V0 through Vx.
+pub fn read_v0_through_vx_from_mem(ch8: &mut Chip8, x: uint) {
+    if x == 0 {
+        return;
+    }
+    copy_memory(ch8.v.mut_slice(0, x),
+                ch8.ram.slice(ch8.i as uint, ch8.i as uint + x));
 }
 
 #[test]
