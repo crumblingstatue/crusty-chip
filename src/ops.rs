@@ -155,8 +155,27 @@ pub fn sub_vx_vy(ch8: &mut Chip8, x: uint, y: uint) {
 // If the most-significant bit of Vx is 1, then VF is set to 1, otherwise
 // to 0. Then Vx is multiplied by 2.
 pub fn set_vx_to_vx_shl_1(ch8: &mut Chip8, x: uint) {
-    // TODO: Is this just a left shift by 1?
-    ch8.v[x] <<= 1;
+    ch8.v[0xF] = if check_bit(ch8.v[x], 7) {1} else {0};
+    ch8.v[x] *= 2;
+}
+
+fn check_bit(byte: u8, pos: uint) -> bool {
+    byte & (1 << pos) != 0
+}
+
+#[test]
+fn test_check_bit() {
+    assert!(check_bit(0b10000000, 7));
+    for i in range(0u, 7) {
+        assert!(!check_bit(0b10000000, i));
+    }
+    assert!(check_bit(0b01000000, 6));
+    assert!(check_bit(0b00100000, 5));
+    assert!(check_bit(0b00010000, 4));
+    assert!(check_bit(0b00001000, 3));
+    assert!(check_bit(0b00000100, 2));
+    assert!(check_bit(0b00000010, 1));
+    assert!(check_bit(0b00000001, 0));
 }
 
 pub fn set_i(ch8: &mut Chip8, to: u16) {
