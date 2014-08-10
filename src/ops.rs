@@ -145,7 +145,7 @@ pub fn add_vx_vy(ch8: &mut Chip8, x: uint, y: uint) {
 // If Vx > Vy, then VF is set to 1, otherwise 0. Then Vy is subtracted from Vx,
 // and the results stored in Vx.
 pub fn sub_vx_vy(ch8: &mut Chip8, x: uint, y: uint) {
-    ch8.v[0xF] = (ch8.v[x] > ch8.v[y]) as u8;
+    ch8.v[0xF] = if (ch8.v[x] > ch8.v[y]) {1} else {0};
     ch8.v[x] -= ch8.v[y];
 }
 
