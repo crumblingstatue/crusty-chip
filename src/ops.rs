@@ -105,6 +105,17 @@ pub fn set_vx_to_vy(ch8: &mut Chip8, x: uint, y: uint) {
     ch8.v[x] = ch8.v[y];
 }
 
+// 8xy1 - OR Vx, Vy
+// Set Vx = Vx OR Vy.
+//
+// Performs a bitwise OR on the values of Vx and Vy, then stores the result
+// in Vx. A bitwise OR compares the corrseponding bits from two values,
+// and if either bit is 1, then the same bit in the result is also 1.
+// Otherwise, it is 0.
+pub fn set_vx_to_vx_or_vy(ch8: &mut Chip8, x: uint, y: uint) {
+    ch8.v[x] |= ch8.v[y];
+}
+
 // 8xy2 - AND Vx, Vy
 // Set Vx = Vx AND Vy.
 //

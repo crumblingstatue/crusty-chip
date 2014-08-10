@@ -166,6 +166,7 @@ impl <'a> Chip8 <'a> {
                 let (x, y) = (x as uint, y as uint);
                 match n {
                     0x0 => ops::set_vx_to_vy(self, x, y),
+                    0x1 => ops::set_vx_to_vx_or_vy(self, x, y),
                     0x2 => ops::set_vx_to_vx_and_vy(self, x, y),
                     0x3 => ops::set_vx_to_vx_xor_vy(self, x, y),
                     0x4 => ops::add_vx_vy(self, x, y),
