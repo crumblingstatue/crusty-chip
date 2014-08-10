@@ -105,6 +105,60 @@ pub fn set_vx_to_vy(ch8: &mut Chip8, x: uint, y: uint) {
     ch8.v[x] = ch8.v[y];
 }
 
+// 8xy2 - AND Vx, Vy
+// Set Vx = Vx AND Vy.
+//
+// Performs a bitwise AND on the values of Vx and Vy, then stores the
+// result in Vx. A bitwise AND compares the corrseponding bits from two
+// values, and if both bits are 1, then the same bit in the result is also
+// 1. Otherwise, it is 0.
+pub fn set_vx_to_vx_and_vy(ch8: &mut Chip8, x: uint, y: uint) {
+    ch8.v[x] &= ch8.v[y];
+}
+
+// 8xy3 - XOR Vx, Vy
+// Set Vx = Vx XOR Vy.
+//
+// Performs a bitwise exclusive OR on the values of Vx and Vy, then stores
+// the result in Vx. An exclusive OR compares the corrseponding bits from
+// two values, and if the bits are not both the same, then the
+// corresponding bit in the result is set to 1. Otherwise, it is 0.
+pub fn set_vx_to_vx_xor_vy(ch8: &mut Chip8, x: uint, y: uint) {
+    ch8.v[x] ^= ch8.v[y];
+}
+
+// 8xy4 - ADD Vx, Vy
+// Set Vx = Vx + Vy, set VF = carry.
+//
+// The values of Vx and Vy are added together. If the result is greater than
+// 8 bits (i.e., > 255,) VF is set to 1, otherwise 0. Only the lowest 8 bits
+// of the result are kept, and stored in Vx.
+pub fn add_vx_vy(ch8: &mut Chip8, x: uint, y: uint) {
+    let result = (ch8.v[x] + ch8.v[y]) as u16;
+    ch8.v[0xF] = (result > 255) as u8;
+    ch8.v[x] = result as u8;
+}
+
+// 8xy5 - SUB Vx, Vy
+// Set Vx = Vx - Vy, set VF = NOT borrow.
+//
+// If Vx > Vy, then VF is set to 1, otherwise 0. Then Vy is subtracted from Vx,
+// and the results stored in Vx.
+pub fn sub_vx_vy(ch8: &mut Chip8, x: uint, y: uint) {
+    ch8.v[0xF] = (ch8.v[x] > ch8.v[y]) as u8;
+    ch8.v[x] -= ch8.v[y];
+}
+
+// 8xyE - SHL Vx {, Vy}
+// Set Vx = Vx SHL 1.
+//
+// If the most-significant bit of Vx is 1, then VF is set to 1, otherwise
+// to 0. Then Vx is multiplied by 2.
+pub fn set_vx_to_vx_shl_1(ch8: &mut Chip8, x: uint) {
+    // TODO: Is this just a left shift by 1?
+    ch8.v[x] <<= 1;
+}
+
 pub fn set_i(ch8: &mut Chip8, to: u16) {
     ch8.i = to;
 }
@@ -140,17 +194,6 @@ pub fn display_sprite(ch8: &mut Chip8, vx: uint, vy: uint, n: uint) {
     }
 
     (ch8.draw_callback)(ch8.display);
-}
-
-pub fn add_vx_vy(ch8: &mut Chip8, x: uint, y: uint) {
-    let result = (ch8.v[x] + ch8.v[y]) as u16;
-    ch8.v[0xF] = (result > 255) as u8;
-    ch8.v[x] = result as u8;
-}
-
-pub fn sub_vx_vy(ch8: &mut Chip8, x: uint, y: uint) {
-    ch8.v[0xF] = (ch8.v[x] > ch8.v[y]) as u8;
-    ch8.v[x] -= ch8.v[y];
 }
 
 pub fn add_vx_to_i(ch8: &mut Chip8, x: uint) {
@@ -239,38 +282,6 @@ pub fn set_sound_timer(ch8: &mut Chip8, x: u8) {
 // The value of DT is placed into Vx.
 pub fn set_vx_to_delay_timer(ch8: &mut Chip8, x: uint) {
     ch8.v[x] = ch8.delay_timer;
-}
-
-// 8xy3 - XOR Vx, Vy
-// Set Vx = Vx XOR Vy.
-//
-// Performs a bitwise exclusive OR on the values of Vx and Vy, then stores
-// the result in Vx. An exclusive OR compares the corrseponding bits from
-// two values, and if the bits are not both the same, then the
-// corresponding bit in the result is set to 1. Otherwise, it is 0.
-pub fn set_vx_to_vx_xor_vy(ch8: &mut Chip8, x: uint, y: uint) {
-    ch8.v[x] ^= ch8.v[y];
-}
-
-// 8xyE - SHL Vx {, Vy}
-// Set Vx = Vx SHL 1.
-//
-// If the most-significant bit of Vx is 1, then VF is set to 1, otherwise
-// to 0. Then Vx is multiplied by 2.
-pub fn set_vx_to_vx_shl_1(ch8: &mut Chip8, x: uint) {
-    // TODO: Is this just a left shift by 1?
-    ch8.v[x] <<= 1;
-}
-
-// 8xy2 - AND Vx, Vy
-// Set Vx = Vx AND Vy.
-//
-// Performs a bitwise AND on the values of Vx and Vy, then stores the
-// result in Vx. A bitwise AND compares the corrseponding bits from two
-// values, and if both bits are 1, then the same bit in the result is also
-// 1. Otherwise, it is 0.
-pub fn set_vx_to_vx_and_vy(ch8: &mut Chip8, x: uint, y: uint) {
-    ch8.v[x] &= ch8.v[y];
 }
 
 // ExA1 - SKNP Vx
