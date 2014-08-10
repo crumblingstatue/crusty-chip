@@ -232,12 +232,12 @@ pub fn set_vx_rand_and(ch8: &mut Chip8, x: uint, to: u8) {
 // more information on XOR, and section 2.4, Display, for more information on
 // the Chip-8 screen and sprites.
 pub fn display_sprite(ch8: &mut Chip8, vx: uint, vy: uint, n: uint) {
-    // TODO: Implement setting VF if collision occurs
     // TODO: Implement wrapping
     use super::{ DISPLAY_WIDTH, DISPLAY_HEIGHT };
     let x_off = ch8.v[vx] as uint;
     let y_off = ch8.v[vy] as uint * DISPLAY_WIDTH;
     let offset = x_off + y_off;
+    ch8.v[0xF] = 0;
 
     for mut y in range(0u, n) {
         if y >= DISPLAY_HEIGHT {
@@ -250,7 +250,11 @@ pub fn display_sprite(ch8: &mut Chip8, vx: uint, vy: uint, n: uint) {
             }
             let idx = offset + (y * DISPLAY_WIDTH) + x;
             if idx < DISPLAY_WIDTH * DISPLAY_HEIGHT {
+                let before = ch8.display[idx];
                 ch8.display[idx] ^= b & (0b10000000 >> x);
+                if before != 0 && ch8.display[idx] == 0 {
+                    ch8.v[0xF] = 1;
+                }
             } else {
                 println!("Warning: Out of bounds VRAM write: {}", idx);
             }
