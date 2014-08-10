@@ -308,16 +308,16 @@ pub fn wait_for_keypress_store_in_vx(ch8: &mut Chip8, x: uint) {
 // Set delay timer = Vx.
 //
 // DT is set equal to the value of Vx.
-pub fn set_delay_timer(ch8: &mut Chip8, x: u8) {
-    ch8.delay_timer = x;
+pub fn set_delay_timer(ch8: &mut Chip8, x: uint) {
+    ch8.delay_timer = ch8.v[x];
 }
 
 // Fx18 - LD ST, Vx
 // Set sound timer = Vx.
 //
 // ST is set equal to the value of Vx.
-pub fn set_sound_timer(ch8: &mut Chip8, x: u8) {
-    ch8.sound_timer = x;
+pub fn set_sound_timer(ch8: &mut Chip8, x: uint) {
+    ch8.sound_timer = ch8.v[x];
 }
 
 // Fx1E - ADD I, Vx

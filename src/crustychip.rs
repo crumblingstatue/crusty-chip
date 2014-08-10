@@ -191,8 +191,8 @@ impl <'a> Chip8 <'a> {
                 match kk {
                     0x07 => ops::set_vx_to_delay_timer(self, x as uint),
                     0x0A => ops::wait_for_keypress_store_in_vx(self, x as uint),
-                    0x15 => ops::set_delay_timer(self, x as u8),
-                    0x18 => ops::set_sound_timer(self, x as u8),
+                    0x15 => ops::set_delay_timer(self, x as uint),
+                    0x18 => ops::set_sound_timer(self, x as uint),
                     0x1E => ops::add_vx_to_i(self, x as uint),
                     0x29 => ops::set_i_to_loc_of_digit_vx(self, x as uint),
                     0x33 => ops::store_bcd_of_vx_to_i(self, x as uint),
