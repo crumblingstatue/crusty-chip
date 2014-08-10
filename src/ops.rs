@@ -233,6 +233,7 @@ pub fn set_vx_rand_and(ch8: &mut Chip8, x: uint, to: u8) {
 // the Chip-8 screen and sprites.
 pub fn display_sprite(ch8: &mut Chip8, vx: uint, vy: uint, n: uint) {
     // TODO: Implement setting VF if collision occurs
+    // TODO: Implement wrapping
     use super::{ DISPLAY_WIDTH, DISPLAY_HEIGHT };
     let x_off = ch8.v[vx] as uint;
     let y_off = ch8.v[vy] as uint * DISPLAY_WIDTH;
