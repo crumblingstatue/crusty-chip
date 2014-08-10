@@ -299,7 +299,7 @@ pub fn set_sound_timer(ch8: &mut Chip8, x: u8) {
 //
 // The values of I and Vx are added, and the results are stored in I.
 pub fn add_vx_to_i(ch8: &mut Chip8, x: uint) {
-    ch8.i += x as u16;
+    ch8.i += ch8.v[x] as u16;
 }
 
 // Fx29 - LD F, Vx
