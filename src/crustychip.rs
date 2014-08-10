@@ -184,6 +184,7 @@ impl <'a> Chip8 <'a> {
             0xD => ops::display_sprite(self, x as uint, y as uint, n as uint),
             0xE => match kk {
                 0xA1 => ops::skip_next_key_vx_not_pressed(self, x as uint),
+                0x9E => ops::skip_next_key_vx_pressed(self, x as uint),
                 _ => fail!("Unknown 0xEXXX instruction: {:x}", ins)
             },
             0xF => {

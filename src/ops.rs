@@ -270,6 +270,17 @@ pub fn skip_next_key_vx_not_pressed(ch8: &mut Chip8, x: uint) {
     }
 }
 
+// Ex9E - SKP Vx
+// Skip next instruction if key with the value of Vx is pressed.
+//
+// Checks the keyboard, and if the key corresponding to the value of Vx is
+// currently in the down position, PC is increased by 2.
+pub fn skip_next_key_vx_pressed(ch8: &mut Chip8, x: uint) {
+    if ch8.keys[ch8.v[x] as uint] {
+        ch8.pc += 2;
+    }
+}
+
 // Fx07 - LD Vx, DT
 // Set Vx = delay timer value.
 //
