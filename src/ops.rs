@@ -135,7 +135,7 @@ pub fn set_vx_to_vx_xor_vy(ch8: &mut Chip8, x: uint, y: uint) {
 // of the result are kept, and stored in Vx.
 pub fn add_vx_vy(ch8: &mut Chip8, x: uint, y: uint) {
     let result = (ch8.v[x] + ch8.v[y]) as u16;
-    ch8.v[0xF] = (result > 255) as u8;
+    ch8.v[0xF] = if (result > 255) {1} else {0};
     ch8.v[x] = result as u8;
 }
 
