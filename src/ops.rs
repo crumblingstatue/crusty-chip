@@ -1,12 +1,11 @@
 use super::Chip8;
-use std::slice::bytes::copy_memory;
 
 // 0nnn - SYS addr
 // Jump to a machine code routine at nnn.
 //
 // This instruction is only used on the old computers on which Chip-8 was
 // originally implemented. It is ignored by modern interpreters.
-pub fn jump_to_sys_routine(ch8: &mut Chip8, addr: uint) {
+pub fn jump_to_sys_routine(_ch8: &mut Chip8, _addr: uint) {
     // Do nothing
 }
 
@@ -146,7 +145,7 @@ pub fn set_vx_to_vx_xor_vy(ch8: &mut Chip8, x: uint, y: uint) {
 // of the result are kept, and stored in Vx.
 pub fn add_vx_vy(ch8: &mut Chip8, x: uint, y: uint) {
     let result = (ch8.v[x] + ch8.v[y]) as u16;
-    ch8.v[0xF] = if (result > 255) {1} else {0};
+    ch8.v[0xF] = if result > 255 {1} else {0};
     ch8.v[x] = result as u8;
 }
 
@@ -156,7 +155,7 @@ pub fn add_vx_vy(ch8: &mut Chip8, x: uint, y: uint) {
 // If Vx > Vy, then VF is set to 1, otherwise 0. Then Vy is subtracted from Vx,
 // and the results stored in Vx.
 pub fn sub_vx_vy(ch8: &mut Chip8, x: uint, y: uint) {
-    ch8.v[0xF] = if (ch8.v[x] > ch8.v[y]) {1} else {0};
+    ch8.v[0xF] = if ch8.v[x] > ch8.v[y] {1} else {0};
     ch8.v[x] -= ch8.v[y];
 }
 
@@ -361,7 +360,7 @@ pub fn store_bcd_of_vx_to_i(ch8: &mut Chip8, x: uint) {
     let num = ch8.v[x];
     let h = num / 100;
     let t = (num - h * 100) / 10;
-    let o = (num - h * 100 - t * 10);
+    let o = num - h * 100 - t * 10;
     ch8.ram[ch8.i as uint] = h;
     ch8.ram[ch8.i as uint + 1] = t;
     ch8.ram[ch8.i as uint + 2] = o;

@@ -217,7 +217,7 @@ impl <'a> Chip8 <'a> {
     ///
     /// `key` should be in the range `0..15`
     pub fn press_key(&mut self, key: uint) {
-        assert!(key >= 0 && key <= 15);
+        assert!(key <= 15);
         self.keys[key] = true;
         if self.keypress_wait.wait {
             self.v[self.keypress_wait.vx] = key as u8;
@@ -229,7 +229,7 @@ impl <'a> Chip8 <'a> {
     ///
     /// `key` should be in the range `0..15`
     pub fn release_key(&mut self, key: uint) {
-        assert!(key >= 0 && key <= 15);
+        assert!(key <= 15);
         self.keys[key] = false;
     }
 
