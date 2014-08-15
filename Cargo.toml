@@ -4,6 +4,6 @@ name = "crusty-chip"
 version = "0.1.0"
 authors = [ "radiantstatue@gmail.com" ]
 
-[[lib]]
+[lib]
 
 name = "crustychip"
