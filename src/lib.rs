@@ -49,7 +49,7 @@ static fontset: [u8, .. 5 * 0x10] = [
 /// Example:
 ///
 /// ```rust
-///     use crustychip::{ DISPLAY_WIDTH, Chip8 };
+///     use crusty_chip::{ DISPLAY_WIDTH, VirtualMachine };
 ///     // Dump the pixels to stdout
 ///     fn dump_pixels(pixels: &[u8]) {
 ///         for (i, px) in pixels.iter().enumerate() {
@@ -62,7 +62,7 @@ static fontset: [u8, .. 5 * 0x10] = [
 ///             }
 ///         }
 ///     }
-///     let mut ch8 = Chip8::new(dump_pixels);
+///     let mut ch8 = VirtualMachine::new(dump_pixels);
 ///     // ...
 /// ```
 pub type DrawCallback<'a> = |pixels: &[u8]|: 'a;
@@ -73,7 +73,7 @@ struct KeypressWait {
 }
 
 /// CHIP-8 virtual machine
-pub struct Chip8<'a> {
+pub struct VirtualMachine<'a> {
     ram: [u8, .. MEM_SIZE],
     v: [u8, .. 16],
     i: u16,
@@ -88,14 +88,14 @@ pub struct Chip8<'a> {
     keypress_wait: KeypressWait
 }
 
-impl <'a> Chip8 <'a> {
+impl <'a> VirtualMachine <'a> {
 
-    /// Create a new Chip8 VM
+    /// Constructs a new `VirtualMachine`.
     ///
     /// ## Arguments ##
     /// * draw_callback - Callback used when drawing
-    pub fn new(draw_callback: DrawCallback<'a>) -> Chip8<'a> {
-        let mut ch8 = Chip8 {
+    pub fn new(draw_callback: DrawCallback<'a>) -> VirtualMachine<'a> {
+        let mut ch8 = VirtualMachine {
             ram: [0u8, .. MEM_SIZE],
             v: [0u8, .. 16],
             i: 0u16,
