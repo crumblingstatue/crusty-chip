@@ -8,6 +8,8 @@
 //! http://devernay.free.fr/hacks/chip8/C8TECH10.HTM,
 //! Copyright (c) Thomas P. Greene.
 
+#![experimental]
+
 use std::slice::bytes::copy_memory;
 
 mod ops;
