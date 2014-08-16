@@ -242,31 +242,21 @@ pub fn set_vx_rand_and(vm: &mut VirtualMachine, x: uint, to: u8) {
 // more information on XOR, and section 2.4, Display, for more information on
 // the Chip-8 screen and sprites.
 pub fn display_sprite(vm: &mut VirtualMachine, vx: uint, vy: uint, n: uint) {
-    // TODO: Implement wrapping
     use super::{ DISPLAY_WIDTH, DISPLAY_HEIGHT };
-    let x_off = vm.v[vx] as uint;
-    let y_off = vm.v[vy] as uint * DISPLAY_WIDTH;
-    let offset = x_off + y_off;
+
     vm.v[0xF] = 0;
 
     for mut y in range(0u, n) {
-        if y >= DISPLAY_HEIGHT {
-            y = y - DISPLAY_HEIGHT;
-        }
         let b = vm.ram[vm.i as uint + y];
         for mut x in range(0u, 8) {
-            if x >= DISPLAY_WIDTH {
-                x = x - DISPLAY_WIDTH;
-            }
-            let idx = offset + (y * DISPLAY_WIDTH) + x;
-            if idx < DISPLAY_WIDTH * DISPLAY_HEIGHT {
-                let before = vm.display[idx];
-                vm.display[idx] ^= b & (0b10000000 >> x);
-                if before != 0 && vm.display[idx] == 0 {
-                    vm.v[0xF] = 1;
-                }
-            } else {
-                println!("Warning: Out of bounds VRAM write: {}", idx);
+            let xx = (x + vm.v[vx] as uint) % DISPLAY_WIDTH;
+            let yy = (y + vm.v[vy] as uint) % DISPLAY_HEIGHT;
+
+            let idx = yy * DISPLAY_WIDTH + xx;
+            let before = vm.display[idx];
+            vm.display[idx] ^= b & (0b10000000 >> x);
+            if before != 0 && vm.display[idx] == 0 {
+                vm.v[0xF] = 1;
             }
         }
     }
