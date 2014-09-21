@@ -12,7 +12,7 @@ pub fn jump_to_sys_routine(_vm: &mut VirtualMachine, _addr: uint) {
 // 00E0 - CLS
 // Clear the display.
 pub fn clear_display(vm: &mut VirtualMachine) {
-    for px in vm.display.mut_iter() {
+    for px in vm.display.iter_mut() {
         *px = 0;
     }
 }
