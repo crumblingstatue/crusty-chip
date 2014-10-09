@@ -96,15 +96,15 @@ impl <'a> VirtualMachine <'a> {
     /// * draw_callback - Callback used when drawing
     pub fn new(draw_callback: DrawCallback<'a>) -> VirtualMachine<'a> {
         let mut ch8 = VirtualMachine {
-            ram: [0u8, .. MEM_SIZE],
-            v: [0u8, .. 16],
-            i: 0u16,
-            delay_timer: 0u8,
-            sound_timer: 0u8,
+            ram: [0, .. MEM_SIZE],
+            v: [0, .. 16],
+            i: 0,
+            delay_timer: 0,
+            sound_timer: 0,
             pc: START_ADDR,
             sp: 0,
-            stack: [0u16, .. 16],
-            display: [0u8, .. DISPLAY_WIDTH * DISPLAY_HEIGHT],
+            stack: [0, .. 16],
+            display: [0, .. DISPLAY_WIDTH * DISPLAY_HEIGHT],
             draw_callback: draw_callback,
             keys: [false, .. 16],
             keypress_wait: KeypressWait {
