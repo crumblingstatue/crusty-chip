@@ -19,7 +19,7 @@ static MEM_SIZE: uint = 4096;
 pub static DISPLAY_WIDTH: uint = 64;
 pub static DISPLAY_HEIGHT: uint = 32;
 
-static fontset: [u8, .. 5 * 0x10] = [
+static FONTSET: [u8, .. 5 * 0x10] = [
     0xF0, 0x90, 0x90, 0x90, 0xF0, // 0
     0x20, 0x60, 0x20, 0x20, 0x70, // 1
     0xF0, 0x10, 0xF0, 0x80, 0xF0, // 2
@@ -112,7 +112,7 @@ impl <'a> VirtualMachine <'a> {
                 vx: 0
             }
         };
-        copy_memory(ch8.ram.slice_mut(0u, 5 * 0x10), fontset);
+        copy_memory(ch8.ram.slice_mut(0u, 5 * 0x10), FONTSET);
         ch8
     }
 
