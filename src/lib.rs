@@ -14,10 +14,10 @@ use std::slice::bytes::copy_memory;
 
 mod ops;
 
-static START_ADDR: u16 = 0x200;
-static MEM_SIZE: uint = 4096;
-pub static DISPLAY_WIDTH: uint = 64;
-pub static DISPLAY_HEIGHT: uint = 32;
+const START_ADDR: u16 = 0x200;
+const MEM_SIZE: uint = 4096;
+pub const DISPLAY_WIDTH: uint = 64;
+pub const DISPLAY_HEIGHT: uint = 32;
 
 static FONTSET: [u8, .. 5 * 0x10] = [
     0xF0, 0x90, 0x90, 0x90, 0xF0, // 0
