@@ -160,7 +160,7 @@ impl <'a> VirtualMachine <'a> {
             0x4 => ops::skip_next_vx_ne(self, x as uint, kk),
             0x5 => match n {
                 0x0 => ops::skip_next_vx_eq_vy(self, x as uint, y as uint),
-                _ => fail!("Unknown 0x5XXX instruction: {:x}", ins)
+                _ => panic!("Unknown 0x5XXX instruction: {:x}", ins)
             },
             0x6 => ops::set_vx_byte(self, x as uint, kk),
             0x7 => ops::add_vx_byte(self, x as uint, kk),
@@ -175,12 +175,12 @@ impl <'a> VirtualMachine <'a> {
                     0x5 => ops::sub_vx_vy(self, x, y),
                     0x6 => ops::set_vx_to_vx_shr_1(self, x),
                     0xE => ops::set_vx_to_vx_shl_1(self, x),
-                    _ => fail!("Unknown 0x8XXX instruction: {:x}", ins)
+                    _ => panic!("Unknown 0x8XXX instruction: {:x}", ins)
                 }
             },
             0x9 => match n {
                 0x0 => ops::skip_next_vx_ne_vy(self, x as uint, y as uint),
-                _ => fail!("Unknown 0x9XXX instruction: {:x}", ins)
+                _ => panic!("Unknown 0x9XXX instruction: {:x}", ins)
             },
             0xA => ops::set_i(self, nnn),
             0xC => ops::set_vx_rand_and(self, x as uint, kk),
@@ -188,7 +188,7 @@ impl <'a> VirtualMachine <'a> {
             0xE => match kk {
                 0xA1 => ops::skip_next_key_vx_not_pressed(self, x as uint),
                 0x9E => ops::skip_next_key_vx_pressed(self, x as uint),
-                _ => fail!("Unknown 0xEXXX instruction: {:x}", ins)
+                _ => panic!("Unknown 0xEXXX instruction: {:x}", ins)
             },
             0xF => {
                 match kk {
@@ -201,10 +201,10 @@ impl <'a> VirtualMachine <'a> {
                     0x33 => ops::store_bcd_of_vx_to_i(self, x as uint),
                     0x55 => ops::copy_v0_through_vx_to_mem(self, x as uint),
                     0x65 => ops::read_v0_through_vx_from_mem(self, x as uint),
-                    _ => fail!("Unknown 0xFXXX instruction: {:x}", ins)
+                    _ => panic!("Unknown 0xFXXX instruction: {:x}", ins)
                 }
             },
-            _ => fail!("Unknown instruction: {:04x}", ins)
+            _ => panic!("Unknown instruction: {:04x}", ins)
         }
     }
 
