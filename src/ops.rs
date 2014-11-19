@@ -261,7 +261,7 @@ pub fn display_sprite(vm: &mut VirtualMachine, vx: uint, vy: uint, n: uint) {
         }
     }
 
-    (vm.draw_callback)(vm.display);
+    (vm.draw_callback)(vm.display.as_slice());
 }
 
 // ExA1 - SKNP Vx

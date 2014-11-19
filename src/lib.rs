@@ -112,7 +112,7 @@ impl <'a> VirtualMachine <'a> {
                 vx: 0
             }
         };
-        copy_memory(ch8.ram.slice_mut(0u, 5 * 0x10), FONTSET);
+        copy_memory(ch8.ram.slice_mut(0u, 5 * 0x10), FONTSET.as_slice());
         ch8
     }
 
