@@ -19,7 +19,7 @@ const MEM_SIZE: uint = 4096;
 pub const DISPLAY_WIDTH: uint = 64;
 pub const DISPLAY_HEIGHT: uint = 32;
 
-static FONTSET: [u8, .. 5 * 0x10] = [
+static FONTSET: [u8; 5 * 0x10] = [
     0xF0, 0x90, 0x90, 0x90, 0xF0, // 0
     0x20, 0x60, 0x20, 0x20, 0x70, // 1
     0xF0, 0x10, 0xF0, 0x80, 0xF0, // 2
@@ -74,17 +74,17 @@ struct KeypressWait {
 
 /// CHIP-8 virtual machine
 pub struct VirtualMachine<'a> {
-    ram: [u8, .. MEM_SIZE],
-    v: [u8, .. 16],
+    ram: [u8; MEM_SIZE],
+    v: [u8; 16],
     i: u16,
     delay_timer: u8,
     sound_timer: u8,
     pc: u16,
     sp: u8,
-    stack: [u16, .. 16],
-    display: [u8, .. DISPLAY_WIDTH * DISPLAY_HEIGHT],
+    stack: [u16; 16],
+    display: [u8; DISPLAY_WIDTH * DISPLAY_HEIGHT],
     draw_callback: DrawCallback<'a>,
-    keys: [bool, .. 16],
+    keys: [bool; 16],
     keypress_wait: KeypressWait
 }
 
@@ -96,17 +96,17 @@ impl <'a> VirtualMachine <'a> {
     /// * draw_callback - Callback used when drawing
     pub fn new(draw_callback: DrawCallback<'a>) -> VirtualMachine<'a> {
         let mut ch8 = VirtualMachine {
-            ram: [0, .. MEM_SIZE],
-            v: [0, .. 16],
+            ram: [0; MEM_SIZE],
+            v: [0; 16],
             i: 0,
             delay_timer: 0,
             sound_timer: 0,
             pc: START_ADDR,
             sp: 0,
-            stack: [0, .. 16],
-            display: [0, .. DISPLAY_WIDTH * DISPLAY_HEIGHT],
+            stack: [0; 16],
+            display: [0; DISPLAY_WIDTH * DISPLAY_HEIGHT],
             draw_callback: draw_callback,
-            keys: [false, .. 16],
+            keys: [false; 16],
             keypress_wait: KeypressWait {
                 wait: false,
                 vx: 0
