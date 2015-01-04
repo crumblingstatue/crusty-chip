@@ -212,7 +212,7 @@ impl <'a> VirtualMachine <'a> {
         let b1 = self.ram[self.pc as uint];
         let b2 = self.ram[(self.pc + 1) as uint];
         self.pc += 2;
-        b1 as u16 << 8 | b2 as u16
+        (b1 as u16) << 8 | b2 as u16
     }
 
     /// Press a key on the hexadecimal keypad
