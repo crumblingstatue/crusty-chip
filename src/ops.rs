@@ -254,10 +254,11 @@ pub fn display_sprite(vm: &mut VirtualMachine, vx: uint, vy: uint, n: uint) {
 
             if xx < DISPLAY_WIDTH && yy < DISPLAY_HEIGHT {
                 let idx = yy * DISPLAY_WIDTH + xx;
-                let before = vm.display[idx];
-                vm.display[idx] ^= b & (0b10000000 >> x);
-                if before != 0 && vm.display[idx] == 0 {
-                    vm.v[0xF] = 1;
+                if b & (0b10000000 >> x) != 0 {
+                    if vm.display[idx] == 1 {
+                        vm.v[0xF] = 1;
+                    }
+                    vm.display[idx] ^= 1;
                 }
             }
         }
