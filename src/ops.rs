@@ -249,14 +249,16 @@ pub fn display_sprite(vm: &mut VirtualMachine, vx: uint, vy: uint, n: uint) {
     for mut y in range(0u, n) {
         let b = vm.ram[vm.i as uint + y];
         for mut x in range(0u, 8) {
-            let xx = (x + vm.v[vx] as uint) % DISPLAY_WIDTH;
-            let yy = (y + vm.v[vy] as uint) % DISPLAY_HEIGHT;
+            let xx = x + (vm.v[vx] as uint % DISPLAY_WIDTH);
+            let yy = y + (vm.v[vy] as uint % DISPLAY_HEIGHT);
 
-            let idx = yy * DISPLAY_WIDTH + xx;
-            let before = vm.display[idx];
-            vm.display[idx] ^= b & (0b10000000 >> x);
-            if before != 0 && vm.display[idx] == 0 {
-                vm.v[0xF] = 1;
+            if xx < DISPLAY_WIDTH && yy < DISPLAY_HEIGHT {
+                let idx = yy * DISPLAY_WIDTH + xx;
+                let before = vm.display[idx];
+                vm.display[idx] ^= b & (0b10000000 >> x);
+                if before != 0 && vm.display[idx] == 0 {
+                    vm.v[0xF] = 1;
+                }
             }
         }
     }
