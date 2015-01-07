@@ -1,3 +1,5 @@
+[build status](https://travis-ci.org/crumblingstatue/crusty-chip.svg?branch=master)
+
 crusty-chip
 ===========
 
