@@ -62,10 +62,11 @@ static FONTSET: [u8; 5 * 0x10] = [
 ///             }
 ///         }
 ///     }
-///     let mut ch8 = VirtualMachine::new(dump_pixels);
+///     let mut f: fn(&[u8]) = dump_pixels;
+///     let mut ch8 = VirtualMachine::new(&mut f);
 ///     // ...
 /// ```
-pub type DrawCallback<'a> = |pixels: &[u8]|: 'a;
+pub type DrawCallback<'a> = FnMut(&[u8]) + 'a;
 
 struct KeypressWait {
     wait: bool,
@@ -83,7 +84,7 @@ pub struct VirtualMachine<'a> {
     sp: u8,
     stack: [u16; 16],
     display: [u8; DISPLAY_WIDTH * DISPLAY_HEIGHT],
-    draw_callback: DrawCallback<'a>,
+    draw_callback: &'a mut DrawCallback<'a>,
     keys: [bool; 16],
     keypress_wait: KeypressWait
 }
@@ -94,7 +95,7 @@ impl <'a> VirtualMachine <'a> {
     ///
     /// ## Arguments ##
     /// * draw_callback - Callback used when drawing
-    pub fn new(draw_callback: DrawCallback<'a>) -> VirtualMachine<'a> {
+    pub fn new(draw_callback: &'a mut DrawCallback<'a>) -> VirtualMachine<'a> {
         let mut ch8 = VirtualMachine {
             ram: [0; MEM_SIZE],
             v: [0; 16],

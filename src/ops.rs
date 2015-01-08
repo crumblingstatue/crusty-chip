@@ -383,7 +383,8 @@ pub fn read_v0_through_vx_from_mem(vm: &mut VirtualMachine, x: uint) {
 
 #[test]
 fn test_strore_bcd_of_vx_to_i() {
-    let mut vm = VirtualMachine::new(|_| {});
+    let mut closure = |&mut: _: &_| {};
+    let mut vm = VirtualMachine::new(&mut closure);
     vm.v[0] = 146;
     vm.i = 0;
     store_bcd_of_vx_to_i(&mut vm, 0);
