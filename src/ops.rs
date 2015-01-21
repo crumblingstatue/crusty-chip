@@ -186,7 +186,7 @@ fn check_bit(byte: u8, pos: usize) -> bool {
 #[test]
 fn test_check_bit() {
     assert!(check_bit(0b10000000, 7));
-    for i in 0us..7 {
+    for i in 0..7 {
         assert!(!check_bit(0b10000000, i));
     }
     assert!(check_bit(0b01000000, 6));
