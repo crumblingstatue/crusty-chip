@@ -217,6 +217,8 @@ pub fn set_i(vm: &mut VirtualMachine, to: u16) {
     vm.i = to;
 }
 
+extern crate rand;
+
 // Cxkk - RND Vx, byte
 // Set Vx = random byte AND kk.
 //
@@ -224,8 +226,8 @@ pub fn set_i(vm: &mut VirtualMachine, to: u16) {
 // with the value kk. The results are stored in Vx.
 // See instruction 8xy2 for more information on AND.
 pub fn set_vx_rand_and(vm: &mut VirtualMachine, x: usize, to: u8) {
-    use std::rand::{thread_rng, Rng};
-    let mut rgen = thread_rng();
+    use self::rand::Rng;
+    let mut rgen = rand::thread_rng();
     vm.v[x] = rgen.gen::<u8>() & to;
 }
 
