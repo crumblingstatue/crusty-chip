@@ -113,7 +113,7 @@ impl <'a> VirtualMachine <'a> {
                 vx: 0
             }
         };
-        copy_memory(&mut ch8.ram[0usize..5 * 0x10], &FONTSET);
+        copy_memory(&FONTSET, &mut ch8.ram[0usize..5 * 0x10]);
         ch8
     }
 
@@ -123,7 +123,7 @@ impl <'a> VirtualMachine <'a> {
     /// * rom - ROM to load
     pub fn load_rom(&mut self, rom: &[u8]) {
         let len = self.ram.len();
-        copy_memory(&mut self.ram[START_ADDR as usize .. len], rom);
+        copy_memory(rom, &mut self.ram[START_ADDR as usize .. len]);
     }
 
     /// Do an emulation cycle.
