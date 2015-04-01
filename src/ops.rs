@@ -248,9 +248,9 @@ pub fn display_sprite(vm: &mut VirtualMachine, vx: usize, vy: usize, n: usize) {
 
     vm.v[0xF] = 0;
 
-    for y in (0usize..n) {
+    for y in (0..n) {
         let b = vm.ram[vm.i as usize + y];
-        for x in (0usize.. 8) {
+        for x in (0..8) {
             let xx = x + (vm.v[vx] as usize % DISPLAY_WIDTH);
             let yy = y + (vm.v[vy] as usize % DISPLAY_HEIGHT);
 
