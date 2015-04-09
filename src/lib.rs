@@ -12,6 +12,7 @@
 
 use std::slice::bytes::copy_memory;
 use std::num::Wrapping;
+use std::ops::{Deref, DerefMut};
 
 mod ops;
 
@@ -39,14 +40,36 @@ static FONTSET: [u8; 5 * 0x10] = [
     0xF0, 0x80, 0xF0, 0x80, 0x80, // F
 ];
 
+#[derive(Clone, Copy)]
 struct KeypressWait {
     wait: bool,
     vx: usize
 }
 
+macro_rules! array_wrap (
+    ($name:ident, $typ:ty) => (
+        #[derive(Copy)]
+        struct $name($typ);
+        impl Clone for $name {
+            fn clone(&self) -> $name { *self }
+        }
+        impl Deref for $name {
+            type Target = $typ;
+            fn deref(&self) -> &$typ { &self.0 }
+        }
+        impl DerefMut for $name {
+            fn deref_mut(&mut self) -> &mut $typ { &mut self.0 }
+        }
+    )
+);
+
+array_wrap!(DisplayArray, [u8; DISPLAY_WIDTH * DISPLAY_HEIGHT]);
+array_wrap!(MemArray, [u8; MEM_SIZE]);
+
 /// CHIP-8 virtual machine
+#[derive(Clone, Copy)]
 pub struct VirtualMachine {
-    ram: [u8; MEM_SIZE],
+    ram: MemArray,
     v: [Wrapping<u8>; 16],
     i: u16,
     delay_timer: u8,
@@ -54,7 +77,7 @@ pub struct VirtualMachine {
     pc: u16,
     sp: u8,
     stack: [u16; 16],
-    display: [u8; DISPLAY_WIDTH * DISPLAY_HEIGHT],
+    display: DisplayArray,
     display_updated: bool,
     keys: [bool; 16],
     keypress_wait: KeypressWait
@@ -65,7 +88,7 @@ impl VirtualMachine {
     /// Constructs a new `VirtualMachine`.
     pub fn new() -> VirtualMachine {
         let mut ch8 = VirtualMachine {
-            ram: [0; MEM_SIZE],
+            ram: MemArray([0; MEM_SIZE]),
             v: [Wrapping(0); 16],
             i: 0,
             delay_timer: 0,
@@ -73,7 +96,7 @@ impl VirtualMachine {
             pc: START_ADDR,
             sp: 0,
             stack: [0; 16],
-            display: [0; DISPLAY_WIDTH * DISPLAY_HEIGHT],
+            display: DisplayArray([0; DISPLAY_WIDTH * DISPLAY_HEIGHT]),
             display_updated: false,
             keys: [false; 16],
             keypress_wait: KeypressWait {
@@ -218,5 +241,5 @@ impl VirtualMachine {
     }
 
     pub fn display_updated(&self) -> bool { self.display_updated }
-    pub fn display(&self) -> &[u8] { &self.display }
+    pub fn display(&self) -> &[u8] { &*self.display }
 }
