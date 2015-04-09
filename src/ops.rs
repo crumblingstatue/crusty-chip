@@ -1,4 +1,5 @@
 use super::VirtualMachine;
+use std::num::Wrapping;
 
 // 0nnn - SYS addr
 // Jump to a machine code routine at nnn.
@@ -52,7 +53,7 @@ pub fn call_subroutine(vm: &mut VirtualMachine, addr: usize) {
 // The interpreter compares register Vx to kk, and if they are equal,
 // increments the program counter by 2.
 pub fn skip_next_vx_eq(vm: &mut VirtualMachine, x: usize, to: u8) {
-    if vm.v[x] == to {
+    if vm.v[x].0 == to {
         vm.pc += 2;
     }
 }
@@ -63,7 +64,7 @@ pub fn skip_next_vx_eq(vm: &mut VirtualMachine, x: usize, to: u8) {
 // The interpreter compares register Vx to kk, and if they are not equal,
 // increments the program counter by 2.
 pub fn skip_next_vx_ne(vm: &mut VirtualMachine, x: usize, to: u8) {
-    if vm.v[x] != to {
+    if vm.v[x].0 != to {
         vm.pc += 2;
     }
 }
@@ -84,7 +85,7 @@ pub fn skip_next_vx_eq_vy(vm: &mut VirtualMachine, x: usize, y: usize) {
 //
 // The interpreter puts the value kk into register Vx.
 pub fn set_vx_byte(vm: &mut VirtualMachine, x: usize, byte: u8) {
-    vm.v[x] = byte;
+    vm.v[x].0 = byte;
 }
 
 // 7xkk - ADD Vx, byte
@@ -93,7 +94,7 @@ pub fn set_vx_byte(vm: &mut VirtualMachine, x: usize, byte: u8) {
 // Adds the value kk to the value of register Vx, then stores the
 // result in Vx.
 pub fn add_vx_byte(vm: &mut VirtualMachine, x: usize, byte: u8) {
-    vm.v[x] += byte;
+    vm.v[x] = vm.v[x] + Wrapping(byte);
 }
 
 // 8xy0 - LD Vx, Vy
@@ -112,7 +113,7 @@ pub fn set_vx_to_vy(vm: &mut VirtualMachine, x: usize, y: usize) {
 // and if either bit is 1, then the same bit in the result is also 1.
 // Otherwise, it is 0.
 pub fn set_vx_to_vx_or_vy(vm: &mut VirtualMachine, x: usize, y: usize) {
-    vm.v[x] |= vm.v[y];
+    vm.v[x] = vm.v[x] | vm.v[y];
 }
 
 // 8xy2 - AND Vx, Vy
@@ -123,7 +124,7 @@ pub fn set_vx_to_vx_or_vy(vm: &mut VirtualMachine, x: usize, y: usize) {
 // values, and if both bits are 1, then the same bit in the result is also
 // 1. Otherwise, it is 0.
 pub fn set_vx_to_vx_and_vy(vm: &mut VirtualMachine, x: usize, y: usize) {
-    vm.v[x] &= vm.v[y];
+    vm.v[x] = vm.v[x] & vm.v[y];
 }
 
 // 8xy3 - XOR Vx, Vy
@@ -134,7 +135,7 @@ pub fn set_vx_to_vx_and_vy(vm: &mut VirtualMachine, x: usize, y: usize) {
 // two values, and if the bits are not both the same, then the
 // corresponding bit in the result is set to 1. Otherwise, it is 0.
 pub fn set_vx_to_vx_xor_vy(vm: &mut VirtualMachine, x: usize, y: usize) {
-    vm.v[x] ^= vm.v[y];
+    vm.v[x] = vm.v[x] ^ vm.v[y];
 }
 
 // 8xy4 - ADD Vx, Vy
@@ -144,9 +145,9 @@ pub fn set_vx_to_vx_xor_vy(vm: &mut VirtualMachine, x: usize, y: usize) {
 // 8 bits (i.e., > 255,) VF is set to 1, otherwise 0. Only the lowest 8 bits
 // of the result are kept, and stored in Vx.
 pub fn add_vx_vy(vm: &mut VirtualMachine, x: usize, y: usize) {
-    let result = (vm.v[x] + vm.v[y]) as u16;
-    vm.v[0xF] = if result > 255 {1} else {0};
-    vm.v[x] = result as u8;
+    let result = vm.v[x].0 as u16 + vm.v[y].0 as u16;
+    vm.v[0xF].0 = if result > 255 {1} else {0};
+    vm.v[x].0 = result as u8; // TODO: Are these the lowest 8 bits?
 }
 
 // 8xy5 - SUB Vx, Vy
@@ -155,8 +156,8 @@ pub fn add_vx_vy(vm: &mut VirtualMachine, x: usize, y: usize) {
 // If Vx > Vy, then VF is set to 1, otherwise 0. Then Vy is subtracted from Vx,
 // and the results stored in Vx.
 pub fn sub_vx_vy(vm: &mut VirtualMachine, x: usize, y: usize) {
-    vm.v[0xF] = if vm.v[x] > vm.v[y] {1} else {0};
-    vm.v[x] -= vm.v[y];
+    vm.v[0xF].0 = if vm.v[x] > vm.v[y] {1} else {0};
+    vm.v[x] = vm.v[x] - vm.v[y];
 }
 
 // 8xy6 - SHR Vx {, Vy}
@@ -165,8 +166,9 @@ pub fn sub_vx_vy(vm: &mut VirtualMachine, x: usize, y: usize) {
 // If the least-significant bit of Vx is 1, then VF is set to 1, otherwise 0.
 // Then Vx is divided by 2.
 pub fn set_vx_to_vx_shr_1(vm: &mut VirtualMachine, x: usize) {
-    vm.v[0xF] = if check_bit(vm.v[x], 0) {1} else {0};
-    vm.v[x] /= 2;
+    vm.v[0xF].0 = if check_bit(vm.v[x].0, 0) {1} else {0};
+    vm.v[x].0 = vm.v[x].0 / 2; // TODO: This should be Wrapping, but it's not
+                               // Due to Rust oversight
 }
 
 // 8xyE - SHL Vx {, Vy}
@@ -175,8 +177,8 @@ pub fn set_vx_to_vx_shr_1(vm: &mut VirtualMachine, x: usize) {
 // If the most-significant bit of Vx is 1, then VF is set to 1, otherwise
 // to 0. Then Vx is multiplied by 2.
 pub fn set_vx_to_vx_shl_1(vm: &mut VirtualMachine, x: usize) {
-    vm.v[0xF] = if check_bit(vm.v[x], 7) {1} else {0};
-    vm.v[x] *= 2;
+    vm.v[0xF].0 = if check_bit(vm.v[x].0, 7) {1} else {0};
+    vm.v[x] = vm.v[x] * Wrapping(2);
 }
 
 fn check_bit(byte: u8, pos: usize) -> bool {
@@ -228,7 +230,7 @@ extern crate rand;
 pub fn set_vx_rand_and(vm: &mut VirtualMachine, x: usize, to: u8) {
     use self::rand::Rng;
     let mut rgen = rand::thread_rng();
-    vm.v[x] = rgen.gen::<u8>() & to;
+    vm.v[x].0 = rgen.gen::<u8>() & to;
 }
 
 // Dxyn - DRW Vx, Vy, nibble
@@ -246,19 +248,19 @@ pub fn set_vx_rand_and(vm: &mut VirtualMachine, x: usize, to: u8) {
 pub fn display_sprite(vm: &mut VirtualMachine, vx: usize, vy: usize, n: usize) {
     use super::{ DISPLAY_WIDTH, DISPLAY_HEIGHT };
 
-    vm.v[0xF] = 0;
+    vm.v[0xF].0 = 0;
 
     for y in (0..n) {
         let b = vm.ram[vm.i as usize + y];
         for x in (0..8) {
-            let xx = x + (vm.v[vx] as usize % DISPLAY_WIDTH);
-            let yy = y + (vm.v[vy] as usize % DISPLAY_HEIGHT);
+            let xx = x + (vm.v[vx].0 as usize % DISPLAY_WIDTH);
+            let yy = y + (vm.v[vy].0 as usize % DISPLAY_HEIGHT);
 
             if xx < DISPLAY_WIDTH && yy < DISPLAY_HEIGHT {
                 let idx = yy * DISPLAY_WIDTH + xx;
                 if b & (0b10000000 >> x) != 0 {
                     if vm.display[idx] == 1 {
-                        vm.v[0xF] = 1;
+                        vm.v[0xF].0 = 1;
                     }
                     vm.display[idx] ^= 1;
                 }
@@ -275,7 +277,7 @@ pub fn display_sprite(vm: &mut VirtualMachine, vx: usize, vy: usize, n: usize) {
 // Checks the keyboard, and if the key corresponding to the value of
 // Vx is currently in the up position, PC is increased by 2.
 pub fn skip_next_key_vx_not_pressed(vm: &mut VirtualMachine, x: usize) {
-    if !vm.keys[vm.v[x] as usize] {
+    if !vm.keys[vm.v[x].0 as usize] {
         vm.pc += 2;
     }
 }
@@ -286,7 +288,7 @@ pub fn skip_next_key_vx_not_pressed(vm: &mut VirtualMachine, x: usize) {
 // Checks the keyboard, and if the key corresponding to the value of Vx is
 // currently in the down position, PC is increased by 2.
 pub fn skip_next_key_vx_pressed(vm: &mut VirtualMachine, x: usize) {
-    if vm.keys[vm.v[x] as usize] {
+    if vm.keys[vm.v[x].0 as usize] {
         vm.pc += 2;
     }
 }
@@ -296,7 +298,7 @@ pub fn skip_next_key_vx_pressed(vm: &mut VirtualMachine, x: usize) {
 //
 // The value of DT is placed into Vx.
 pub fn set_vx_to_delay_timer(vm: &mut VirtualMachine, x: usize) {
-    vm.v[x] = vm.delay_timer;
+    vm.v[x].0 = vm.delay_timer;
 }
 
 // Fx0A - LD Vx, K
@@ -314,7 +316,7 @@ pub fn wait_for_keypress_store_in_vx(vm: &mut VirtualMachine, x: usize) {
 //
 // DT is set equal to the value of Vx.
 pub fn set_delay_timer(vm: &mut VirtualMachine, x: usize) {
-    vm.delay_timer = vm.v[x];
+    vm.delay_timer = vm.v[x].0;
 }
 
 // Fx18 - LD ST, Vx
@@ -322,7 +324,7 @@ pub fn set_delay_timer(vm: &mut VirtualMachine, x: usize) {
 //
 // ST is set equal to the value of Vx.
 pub fn set_sound_timer(vm: &mut VirtualMachine, x: usize) {
-    vm.sound_timer = vm.v[x];
+    vm.sound_timer = vm.v[x].0;
 }
 
 // Fx1E - ADD I, Vx
@@ -330,7 +332,7 @@ pub fn set_sound_timer(vm: &mut VirtualMachine, x: usize) {
 //
 // The values of I and Vx are added, and the results are stored in I.
 pub fn add_vx_to_i(vm: &mut VirtualMachine, x: usize) {
-    vm.i += vm.v[x] as u16;
+    vm.i += vm.v[x].0 as u16;
 }
 
 // Fx29 - LD F, Vx
@@ -342,7 +344,7 @@ pub fn add_vx_to_i(vm: &mut VirtualMachine, x: usize) {
 //
 // For crusty-chip, the fontset is stored at 0x000
 pub fn set_i_to_loc_of_digit_vx(vm: &mut VirtualMachine, x: usize) {
-    vm.i = (vm.v[x] * 5) as u16;
+    vm.i = (vm.v[x] * Wrapping(5)).0 as u16;
 }
 
 // Fx33 - LD B, Vx
@@ -352,7 +354,7 @@ pub fn set_i_to_loc_of_digit_vx(vm: &mut VirtualMachine, x: usize) {
 // digit in memory at location in I, the tens digit at location I+1,
 // and the ones digit at location I+2.
 pub fn store_bcd_of_vx_to_i(vm: &mut VirtualMachine, x: usize) {
-    let num = vm.v[x];
+    let num = vm.v[x].0; // TODO: Should probably be wrapping
     let h = num / 100;
     let t = (num - h * 100) / 10;
     let o = num - h * 100 - t * 10;
@@ -368,7 +370,7 @@ pub fn store_bcd_of_vx_to_i(vm: &mut VirtualMachine, x: usize) {
 // starting at the address in I.
 pub fn copy_v0_through_vx_to_mem(vm: &mut VirtualMachine, x: usize) {
     for i in (0..x + 1) {
-        vm.ram[(vm.i + i as u16) as usize] = vm.v[i];
+        vm.ram[(vm.i + i as u16) as usize] = vm.v[i].0;
     }
 }
 
@@ -379,7 +381,7 @@ pub fn copy_v0_through_vx_to_mem(vm: &mut VirtualMachine, x: usize) {
 // registers V0 through Vx.
 pub fn read_v0_through_vx_from_mem(vm: &mut VirtualMachine, x: usize) {
     for i in (0..x + 1) {
-        vm.v[i] = vm.ram[(vm.i + i as u16) as usize];
+        vm.v[i].0 = vm.ram[(vm.i + i as u16) as usize];
     }
 }
 

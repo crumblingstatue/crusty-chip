@@ -11,6 +11,7 @@
 #![feature(core)]
 
 use std::slice::bytes::copy_memory;
+use std::num::Wrapping;
 
 mod ops;
 
@@ -76,7 +77,7 @@ struct KeypressWait {
 /// CHIP-8 virtual machine
 pub struct VirtualMachine<'a> {
     ram: [u8; MEM_SIZE],
-    v: [u8; 16],
+    v: [Wrapping<u8>; 16],
     i: u16,
     delay_timer: u8,
     sound_timer: u8,
@@ -98,7 +99,7 @@ impl <'a> VirtualMachine <'a> {
     pub fn new(draw_callback: &'a mut DrawCallback<'a>) -> VirtualMachine<'a> {
         let mut ch8 = VirtualMachine {
             ram: [0; MEM_SIZE],
-            v: [0; 16],
+            v: [Wrapping(0); 16],
             i: 0,
             delay_timer: 0,
             sound_timer: 0,
@@ -223,7 +224,7 @@ impl <'a> VirtualMachine <'a> {
         assert!(key <= 15);
         self.keys[key] = true;
         if self.keypress_wait.wait {
-            self.v[self.keypress_wait.vx] = key as u8;
+            self.v[self.keypress_wait.vx].0 = key as u8;
             self.keypress_wait.wait = false;
         }
     }
