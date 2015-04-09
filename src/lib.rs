@@ -39,43 +39,13 @@ static FONTSET: [u8; 5 * 0x10] = [
     0xF0, 0x80, 0xF0, 0x80, 0x80, // F
 ];
 
-/// Draw callback.
-///
-/// Takes a slice of u8, where each u8 is a pixel.
-///
-/// A **non-zero** pixel is visible, a **zero** pixel is not visible.
-///
-/// The coordinate system is from top-left to bottom-right.
-///
-/// Example:
-///
-/// ```rust
-///     use crusty_chip::{ DISPLAY_WIDTH, VirtualMachine };
-///     // Dump the pixels to stdout
-///     fn dump_pixels(pixels: &[u8]) {
-///         for (i, px) in pixels.iter().enumerate() {
-///             match *px {
-///                 0 => print!(" "),
-///                 _ => print!("#")
-///             }
-///             if i % DISPLAY_WIDTH == 0 {
-///                 print!("\n");
-///             }
-///         }
-///     }
-///     let mut f: fn(&[u8]) = dump_pixels;
-///     let mut ch8 = VirtualMachine::new(&mut f);
-///     // ...
-/// ```
-pub type DrawCallback<'a> = FnMut(&[u8]) + 'a;
-
 struct KeypressWait {
     wait: bool,
     vx: usize
 }
 
 /// CHIP-8 virtual machine
-pub struct VirtualMachine<'a> {
+pub struct VirtualMachine {
     ram: [u8; MEM_SIZE],
     v: [Wrapping<u8>; 16],
     i: u16,
@@ -85,18 +55,15 @@ pub struct VirtualMachine<'a> {
     sp: u8,
     stack: [u16; 16],
     display: [u8; DISPLAY_WIDTH * DISPLAY_HEIGHT],
-    draw_callback: &'a mut DrawCallback<'a>,
+    display_updated: bool,
     keys: [bool; 16],
     keypress_wait: KeypressWait
 }
 
-impl <'a> VirtualMachine <'a> {
+impl VirtualMachine {
 
     /// Constructs a new `VirtualMachine`.
-    ///
-    /// ## Arguments ##
-    /// * draw_callback - Callback used when drawing
-    pub fn new(draw_callback: &'a mut DrawCallback<'a>) -> VirtualMachine<'a> {
+    pub fn new() -> VirtualMachine {
         let mut ch8 = VirtualMachine {
             ram: [0; MEM_SIZE],
             v: [Wrapping(0); 16],
@@ -107,7 +74,7 @@ impl <'a> VirtualMachine <'a> {
             sp: 0,
             stack: [0; 16],
             display: [0; DISPLAY_WIDTH * DISPLAY_HEIGHT],
-            draw_callback: draw_callback,
+            display_updated: false,
             keys: [false; 16],
             keypress_wait: KeypressWait {
                 wait: false,
@@ -129,6 +96,7 @@ impl <'a> VirtualMachine <'a> {
 
     /// Do an emulation cycle.
     pub fn do_cycle(&mut self) {
+        self.display_updated = false;
         if self.keypress_wait.wait {
             return;
         }
@@ -248,4 +216,7 @@ impl <'a> VirtualMachine <'a> {
             self.sound_timer -= 1;
         }
     }
+
+    pub fn display_updated(&self) -> bool { self.display_updated }
+    pub fn display(&self) -> &[u8] { &self.display }
 }

@@ -268,7 +268,7 @@ pub fn display_sprite(vm: &mut VirtualMachine, vx: usize, vy: usize, n: usize) {
         }
     }
 
-    (vm.draw_callback)(&vm.display);
+    vm.display_updated = true;
 }
 
 // ExA1 - SKNP Vx
@@ -387,8 +387,7 @@ pub fn read_v0_through_vx_from_mem(vm: &mut VirtualMachine, x: usize) {
 
 #[test]
 fn test_strore_bcd_of_vx_to_i() {
-    let mut closure = |_: &_| {};
-    let mut vm = VirtualMachine::new(&mut closure);
+    let mut vm = VirtualMachine::new();
     vm.v[0].0 = 146;
     vm.i = 0;
     store_bcd_of_vx_to_i(&mut vm, 0);
