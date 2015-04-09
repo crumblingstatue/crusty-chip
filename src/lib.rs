@@ -9,6 +9,7 @@
 //! Copyright (c) Thomas P. Greene.
 
 #![feature(core)]
+#![warn(missing_docs)]
 
 use std::slice::bytes::copy_memory;
 use std::num::Wrapping;
@@ -18,7 +19,9 @@ mod ops;
 
 const START_ADDR: u16 = 0x200;
 const MEM_SIZE: usize = 4096;
+/// The width of the Chip8's display in pixels.
 pub const DISPLAY_WIDTH: usize = 64;
+/// The height of the Chip8's display in pixels.
 pub const DISPLAY_HEIGHT: usize = 32;
 
 static FONTSET: [u8; 5 * 0x10] = [
@@ -66,7 +69,7 @@ macro_rules! array_wrap (
 array_wrap!(DisplayArray, [u8; DISPLAY_WIDTH * DISPLAY_HEIGHT]);
 array_wrap!(MemArray, [u8; MEM_SIZE]);
 
-/// CHIP-8 virtual machine
+/// A CHIP-8 virtual machine.
 #[derive(Clone, Copy)]
 pub struct VirtualMachine {
     ram: MemArray,
@@ -85,7 +88,7 @@ pub struct VirtualMachine {
 
 impl VirtualMachine {
 
-    /// Constructs a new `VirtualMachine`.
+    /// Constructs a new VirtualMachine.
     pub fn new() -> VirtualMachine {
         let mut ch8 = VirtualMachine {
             ram: MemArray([0; MEM_SIZE]),
@@ -108,7 +111,7 @@ impl VirtualMachine {
         ch8
     }
 
-    /// Load a ROM
+    /// Loads a ROM into the VirtualMachine.
     ///
     /// ## Arguments ##
     /// * rom - ROM to load
@@ -117,7 +120,7 @@ impl VirtualMachine {
         copy_memory(rom, &mut self.ram[START_ADDR as usize .. len]);
     }
 
-    /// Do an emulation cycle.
+    /// Does an emulation cycle.
     pub fn do_cycle(&mut self) {
         self.display_updated = false;
         if self.keypress_wait.wait {
@@ -208,9 +211,9 @@ impl VirtualMachine {
         (b1 as u16) << 8 | b2 as u16
     }
 
-    /// Press a key on the hexadecimal keypad
+    /// Presses a key on the hexadecimal keypad.
     ///
-    /// `key` should be in the range `0..15`
+    /// `key` should be in the range `0..15`.
     pub fn press_key(&mut self, key: usize) {
         assert!(key <= 15);
         self.keys[key] = true;
@@ -220,17 +223,17 @@ impl VirtualMachine {
         }
     }
 
-    /// Release a key on the hexadecimal keypad
+    /// Releases a key on the hexadecimal keypad.
     ///
-    /// `key` should be in the range `0..15`
+    /// `key` should be in the range `0..15`.
     pub fn release_key(&mut self, key: usize) {
         assert!(key <= 15);
         self.keys[key] = false;
     }
 
-    /// Decrement the sound and delay timers
+    /// Decrements the sound and delay timers.
     ///
-    /// They should be decremented at a rate of 60 Hz
+    /// They should be decremented at a rate of 60 Hz.
     pub fn decrement_timers(&mut self) {
         if self.delay_timer > 0 {
             self.delay_timer -= 1;
@@ -240,6 +243,8 @@ impl VirtualMachine {
         }
     }
 
+    /// Returns whether the display has been updated.
     pub fn display_updated(&self) -> bool { self.display_updated }
-    pub fn display(&self) -> &[u8] { &*self.display }
+    /// Returns the contents of the display.
+    pub fn display(&self) -> &[u8; DISPLAY_WIDTH * DISPLAY_HEIGHT] { &*self.display }
 }
