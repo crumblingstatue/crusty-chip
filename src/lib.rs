@@ -8,14 +8,24 @@
 //! http://devernay.free.fr/hacks/chip8/C8TECH10.HTM,
 //! Copyright (c) Thomas P. Greene.
 
-#![feature(core)]
 #![warn(missing_docs)]
 
-use std::slice::bytes::copy_memory;
 use std::num::Wrapping;
 use std::ops::{Deref, DerefMut};
 
 mod ops;
+
+fn copy_memory(src: &[u8], dst: &mut [u8]) {
+        let len_src = src.len();
+        assert!(dst.len() >= len_src);
+        // `dst` is unaliasable, so we know statically it doesn't overlap
+        // with `src`.
+        unsafe {
+            std::ptr::copy_nonoverlapping(src.as_ptr(),
+                                          dst.as_mut_ptr(),
+                                          len_src);
+        }
+    }
 
 const START_ADDR: u16 = 0x200;
 const MEM_SIZE: usize = 4096;
