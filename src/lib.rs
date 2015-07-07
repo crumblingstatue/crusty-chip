@@ -214,11 +214,17 @@ impl VirtualMachine {
         }
     }
 
-    fn fetch_ins(&mut self) -> u16 {
+    /// Gets the instruction that the instruction pointer is pointing to.
+    pub fn get_ins(&self) -> u16 {
         let b1 = self.ram[self.pc as usize];
         let b2 = self.ram[(self.pc + 1) as usize];
-        self.pc += 2;
         (b1 as u16) << 8 | b2 as u16
+    }
+
+    fn fetch_ins(&mut self) -> u16 {
+        let ins = self.get_ins();
+        self.pc += 2;
+        ins
     }
 
     /// Presses a key on the hexadecimal keypad.
