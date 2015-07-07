@@ -134,17 +134,20 @@ pub fn decode(ins: u16) -> Instruction {
     }
 }
 
-fn copy_memory(src: &[u8], dst: &mut [u8]) {
-        let len_src = src.len();
-        assert!(dst.len() >= len_src);
-        // `dst` is unaliasable, so we know statically it doesn't overlap
-        // with `src`.
-        unsafe {
-            std::ptr::copy_nonoverlapping(src.as_ptr(),
-                                          dst.as_mut_ptr(),
-                                          len_src);
-        }
+fn copy_memory(src: &[u8], dst: &mut [u8]) -> Result<(), ()> {
+    let len_src = src.len();
+    if !(dst.len() >= len_src) {
+        return Err(())
     }
+    // `dst` is unaliasable, so we know statically it doesn't overlap
+    // with `src`.
+    unsafe {
+        std::ptr::copy_nonoverlapping(src.as_ptr(),
+                                      dst.as_mut_ptr(),
+                                      len_src);
+    }
+    Ok(())
+}
 
 const START_ADDR: u16 = 0x200;
 const MEM_SIZE: usize = 4096;
@@ -236,7 +239,9 @@ impl VirtualMachine {
                 vx: 0
             }
         };
-        copy_memory(&FONTSET, &mut ch8.ram[0usize..5 * 0x10]);
+        copy_memory(&FONTSET, &mut ch8.ram[0usize..5 * 0x10])
+            .ok()
+            .expect("Couldn't copy fontset");
         ch8
     }
 
@@ -244,9 +249,10 @@ impl VirtualMachine {
     ///
     /// ## Arguments ##
     /// * rom - ROM to load
-    pub fn load_rom(&mut self, rom: &[u8]) {
+    pub fn load_rom(&mut self, rom: &[u8]) -> Result<(), ()> {
         let len = self.ram.len();
-        copy_memory(rom, &mut self.ram[START_ADDR as usize .. len]);
+        try!(copy_memory(rom, &mut self.ram[START_ADDR as usize .. len]));
+        Ok(())
     }
 
     /// Does an emulation cycle.
