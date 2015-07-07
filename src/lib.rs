@@ -214,11 +214,16 @@ impl VirtualMachine {
         }
     }
 
-    /// Gets the instruction that the instruction pointer is pointing to.
+    /// Gets the instruction that the program counter is pointing to.
     pub fn get_ins(&self) -> u16 {
         let b1 = self.ram[self.pc as usize];
         let b2 = self.ram[(self.pc + 1) as usize];
         (b1 as u16) << 8 | b2 as u16
+    }
+
+    /// Returns the value of the program counter.
+    pub fn pc(&self) -> u16 {
+        self.pc
     }
 
     fn fetch_ins(&mut self) -> u16 {
