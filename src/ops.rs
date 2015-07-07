@@ -160,6 +160,16 @@ pub fn sub_vx_vy(vm: &mut VirtualMachine, x: usize, y: usize) {
     vm.v[x] = vm.v[x] - vm.v[y];
 }
 
+// 8xy7 - SUBN Vx, Vy
+// Set Vx = Vy - Vx, set VF = NOT borrow.
+//
+// If Vy > Vx, then VF is set to 1, otherwise 0. Then Vx is subtracted from Vy,
+// and the results stored in Vx.
+pub fn subn_vx_vy(vm: &mut VirtualMachine, x: usize, y: usize) {
+    vm.v[0xF].0 = if vm.v[y] > vm.v[x] {1} else {0};
+    vm.v[x] = vm.v[y] - vm.v[x];
+}
+
 // 8xy6 - SHR Vx {, Vy}
 // Set Vx = Vx SHR 1.
 //
