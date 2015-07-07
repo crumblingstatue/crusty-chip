@@ -23,6 +23,7 @@ pub type Byte = u8;
 pub type Semiword = u16;
 
 #[allow(missing_docs)]
+#[derive(Debug)]
 /// A CHIP-8 instruction.
 pub enum Instruction {
     ClearDisplay,
