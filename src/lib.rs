@@ -15,6 +15,124 @@ use std::ops::{Deref, DerefMut};
 
 mod ops;
 
+/// 4 bit value extracted from an instruction.
+pub type Nibble = u8;
+/// 8 bit value extracted from an instruction.
+pub type Byte = u8;
+/// 12 bit value extracted from an instruction.
+pub type Semiword = u16;
+
+#[allow(missing_docs)]
+/// A CHIP-8 instruction.
+pub enum Instruction {
+    ClearDisplay,
+    Return,
+    JumpToSysRoutine{addr: Semiword},
+    JumpToAddress{addr: Semiword},
+    CallSubroutine{addr: Semiword},
+    SkipNextVxEq{x: Nibble, cmp_with: Byte},
+    SkipNextVxNe{x: Nibble, cmp_with: Byte},
+    SkipNextVxEqVy{x: Nibble, y: Nibble},
+    SetVxByte{x: Nibble, to: Byte},
+    AddVxByte{x: Nibble, rhs: Byte},
+    SetVxToVy{x: Nibble, y: Nibble},
+    SetVxToVxOrVy{x: Nibble, y: Nibble},
+    SetVxToVxAndVy{x: Nibble, y: Nibble},
+    SetVxToVxXorVy{x: Nibble, y: Nibble},
+    AddVxVy{x: Nibble, y: Nibble},
+    SubVxVy{x: Nibble, y: Nibble},
+    SetVxToVxShr1{x: Nibble},
+    SetVxToVxShl1{x: Nibble},
+    SkipNextVxNeVy{x: Nibble, y: Nibble},
+    SetI{to: Semiword},
+    SetVxRandAnd{x: Nibble, and: Byte},
+    DisplaySprite{x: Nibble, y: Nibble, n: Nibble},
+    SkipNextKeyVxNotPressed{x: Nibble},
+    SkipNextKeyVxPressed{x: Nibble},
+    SetVxToDelayTimer{x: Nibble},
+    WaitForKeypressStoreInVx{x: Nibble},
+    SetDelayTimer{x: Nibble},
+    SetSoundTimer{x: Nibble},
+    AddVxToI{x: Nibble},
+    SetIToLocOfDigitVx{x: Nibble},
+    StoreBcdOfVxToI{x: Nibble},
+    CopyV0ThroughVxToMem{x: Nibble},
+    ReadV0ThroughVxFromMem{x: Nibble},
+    Unknown,
+}
+
+/// Decode a raw instruction into an Instruction structure.
+pub fn decode(ins: u16) -> Instruction {
+    use self::Instruction::*;
+
+    // A 12-bit value, the lowest 12 bits of the instruction
+    let nnn: Semiword = ins & 0x0FFF;
+    // A 4-bit value, the lowest 4 bits of the instruction
+    let n: Nibble = (ins & 0x000F) as Nibble;
+    // A 4-bit value, the lower 4 bits of the high byte of the instruction
+    let x: Nibble = ((ins & 0x0F00) >> 8) as Nibble;
+    // A 4-bit value, the upper 4 bits of the low byte of the instruction
+    let y: Nibble = ((ins & 0x00F0) >> 4) as Nibble;
+    // kk or byte - An 8-bit value, the lowest 8 bits of the instruction
+    let kk: Byte = (ins & 0x00FF) as Nibble;
+
+    match (ins & 0xF000) >> 12 {
+        0x0 => match nnn {
+            0x0E0 => ClearDisplay,
+            0x0EE => Return,
+            _ => JumpToSysRoutine{addr: nnn},
+        },
+        0x1 => JumpToAddress{addr: nnn},
+        0x2 => CallSubroutine{addr: nnn},
+        0x3 => SkipNextVxEq{x: x, cmp_with: kk},
+        0x4 => SkipNextVxNe{x: x, cmp_with: kk},
+        0x5 => match n {
+            0x0 => SkipNextVxEqVy{x: x, y: y},
+            _ => Unknown,
+        },
+        0x6 => SetVxByte{x: x, to: kk},
+        0x7 => AddVxByte{x: x, rhs: kk},
+        0x8 => match n {
+            0x0 => SetVxToVy{x: x, y: y},
+            0x1 => SetVxToVxOrVy{x: x, y: y},
+            0x2 => SetVxToVxAndVy{x: x, y: y},
+            0x3 => SetVxToVxXorVy{x: x, y: y},
+            0x4 => AddVxVy{x: x, y: y},
+            0x5 => SubVxVy{x: x, y: y},
+            0x6 => SetVxToVxShr1{x: x},
+            0xE => SetVxToVxShl1{x: x},
+            _ => Unknown,
+        },
+        0x9 => match n {
+            0x0 => SkipNextVxNeVy{x: x, y: y},
+            _ => Unknown,
+        },
+        0xA => SetI{to: nnn},
+        0xC => SetVxRandAnd{x: x, and: kk},
+        0xD => DisplaySprite{x: x, y: y, n: n},
+        0xE => match kk {
+            0xA1 => SkipNextKeyVxNotPressed{x: x},
+            0x9E => SkipNextKeyVxPressed{x: x},
+            _ => Unknown,
+        },
+        0xF => {
+            match kk {
+                0x07 => SetVxToDelayTimer{x: x},
+                0x0A => WaitForKeypressStoreInVx{x: x},
+                0x15 => SetDelayTimer{x: x},
+                0x18 => SetSoundTimer{x: x},
+                0x1E => AddVxToI{x: x},
+                0x29 => SetIToLocOfDigitVx{x: x},
+                0x33 => StoreBcdOfVxToI{x: x},
+                0x55 => CopyV0ThroughVxToMem{x: x},
+                0x65 => ReadV0ThroughVxFromMem{x: x},
+                _ => Unknown
+            }
+        },
+        _ => Unknown,
+    }
+}
+
 fn copy_memory(src: &[u8], dst: &mut [u8]) {
         let len_src = src.len();
         assert!(dst.len() >= len_src);
@@ -143,74 +261,43 @@ impl VirtualMachine {
 
     // Decode instruction and execute it
     fn dispatch(&mut self, ins: u16) {
-        // A 12-bit value, the lowest 12 bits of the instruction
-        let nnn = ins & 0x0FFF;
-        // A 4-bit value, the lowest 4 bits of the instruction
-        let n = ins & 0x000F;
-        // A 4-bit value, the lower 4 bits of the high byte of the instruction
-        let x = (ins & 0x0F00) >> 8;
-        // A 4-bit value, the upper 4 bits of the low byte of the instruction
-        let y = (ins & 0x00F0) >> 4;
-        // kk or byte - An 8-bit value, the lowest 8 bits of the instruction
-        let kk = (ins & 0x00FF) as u8;
-
-        match (ins & 0xF000) >> 12 {
-            0x0 => match nnn {
-                0x0E0 => ops::clear_display(self, ),
-                0x0EE => ops::ret_from_subroutine(self, ),
-                _ => ops::jump_to_sys_routine(self, 0)
-            },
-            0x1 => ops::jump_addr(self, nnn),
-            0x2 => ops::call_subroutine(self, nnn as usize),
-            0x3 => ops::skip_next_vx_eq(self, x as usize, kk),
-            0x4 => ops::skip_next_vx_ne(self, x as usize, kk),
-            0x5 => match n {
-                0x0 => ops::skip_next_vx_eq_vy(self, x as usize, y as usize),
-                _ => panic!("Unknown 0x5XXX instruction: {:x}", ins)
-            },
-            0x6 => ops::set_vx_byte(self, x as usize, kk),
-            0x7 => ops::add_vx_byte(self, x as usize, kk),
-            0x8 => {
-                let (x, y) = (x as usize, y as usize);
-                match n {
-                    0x0 => ops::set_vx_to_vy(self, x, y),
-                    0x1 => ops::set_vx_to_vx_or_vy(self, x, y),
-                    0x2 => ops::set_vx_to_vx_and_vy(self, x, y),
-                    0x3 => ops::set_vx_to_vx_xor_vy(self, x, y),
-                    0x4 => ops::add_vx_vy(self, x, y),
-                    0x5 => ops::sub_vx_vy(self, x, y),
-                    0x6 => ops::set_vx_to_vx_shr_1(self, x),
-                    0xE => ops::set_vx_to_vx_shl_1(self, x),
-                    _ => panic!("Unknown 0x8XXX instruction: {:x}", ins)
-                }
-            },
-            0x9 => match n {
-                0x0 => ops::skip_next_vx_ne_vy(self, x as usize, y as usize),
-                _ => panic!("Unknown 0x9XXX instruction: {:x}", ins)
-            },
-            0xA => ops::set_i(self, nnn),
-            0xC => ops::set_vx_rand_and(self, x as usize, kk),
-            0xD => ops::display_sprite(self, x as usize, y as usize, n as usize),
-            0xE => match kk {
-                0xA1 => ops::skip_next_key_vx_not_pressed(self, x as usize),
-                0x9E => ops::skip_next_key_vx_pressed(self, x as usize),
-                _ => panic!("Unknown 0xEXXX instruction: {:x}", ins)
-            },
-            0xF => {
-                match kk {
-                    0x07 => ops::set_vx_to_delay_timer(self, x as usize),
-                    0x0A => ops::wait_for_keypress_store_in_vx(self, x as usize),
-                    0x15 => ops::set_delay_timer(self, x as usize),
-                    0x18 => ops::set_sound_timer(self, x as usize),
-                    0x1E => ops::add_vx_to_i(self, x as usize),
-                    0x29 => ops::set_i_to_loc_of_digit_vx(self, x as usize),
-                    0x33 => ops::store_bcd_of_vx_to_i(self, x as usize),
-                    0x55 => ops::copy_v0_through_vx_to_mem(self, x as usize),
-                    0x65 => ops::read_v0_through_vx_from_mem(self, x as usize),
-                    _ => panic!("Unknown 0xFXXX instruction: {:x}", ins)
-                }
-            },
-            _ => panic!("Unknown instruction: {:04x}", ins)
+        use Instruction::*;
+        use ops::*;
+        match decode(ins) {
+            ClearDisplay => clear_display(self),
+            Return => ret_from_subroutine(self),
+            JumpToSysRoutine{addr} => jump_to_sys_routine(self, addr as usize),
+            JumpToAddress{addr} => jump_addr(self, addr),
+            CallSubroutine{addr} => call_subroutine(self, addr as usize),
+            SkipNextVxEq{x, cmp_with} => skip_next_vx_eq(self, x as usize, cmp_with),
+            SkipNextVxNe{x, cmp_with} => skip_next_vx_ne(self, x as usize, cmp_with),
+            SkipNextVxEqVy{x, y} => skip_next_vx_eq_vy(self, x as usize, y as usize),
+            SetVxByte{x, to} => set_vx_byte(self, x as usize, to),
+            AddVxByte{x, rhs} => add_vx_byte(self, x as usize, rhs),
+            SetVxToVy{x, y} => set_vx_to_vy(self, x as usize, y as usize),
+            SetVxToVxOrVy{x, y} => set_vx_to_vx_or_vy(self, x as usize, y as usize),
+            SetVxToVxAndVy{x, y} => set_vx_to_vx_and_vy(self, x as usize, y as usize),
+            SetVxToVxXorVy{x, y} => set_vx_to_vx_xor_vy(self, x as usize, y as usize),
+            AddVxVy{x, y} => add_vx_vy(self, x as usize, y as usize),
+            SubVxVy{x, y} => sub_vx_vy(self, x as usize, y as usize),
+            SetVxToVxShr1{x} => set_vx_to_vx_shr_1(self, x as usize),
+            SetVxToVxShl1{x} => set_vx_to_vx_shl_1(self, x as usize),
+            SkipNextVxNeVy{x, y} => skip_next_vx_ne_vy(self, x as usize, y as usize),
+            SetI{to} => set_i(self, to),
+            SetVxRandAnd{x, and} => set_vx_rand_and(self, x as usize, and),
+            DisplaySprite{x, y, n} => display_sprite(self, x as usize, y as usize, n as usize),
+            SkipNextKeyVxNotPressed{x} => skip_next_key_vx_not_pressed(self, x as usize),
+            SkipNextKeyVxPressed{x} => skip_next_key_vx_pressed(self, x as usize),
+            SetVxToDelayTimer{x} => set_vx_to_delay_timer(self, x as usize),
+            WaitForKeypressStoreInVx{x} => wait_for_keypress_store_in_vx(self, x as usize),
+            SetDelayTimer{x} => set_delay_timer(self, x as usize),
+            SetSoundTimer{x} => set_sound_timer(self, x as usize),
+            AddVxToI{x} => add_vx_to_i(self, x as usize),
+            SetIToLocOfDigitVx{x} => set_i_to_loc_of_digit_vx(self, x as usize),
+            StoreBcdOfVxToI{x} => store_bcd_of_vx_to_i(self, x as usize),
+            CopyV0ThroughVxToMem{x} => copy_v0_through_vx_to_mem(self, x as usize),
+            ReadV0ThroughVxFromMem{x} => read_v0_through_vx_from_mem(self, x as usize),
+            Unknown => panic!("Unknown instruction: {}", ins),
         }
     }
 
