@@ -69,9 +69,8 @@ pub fn set_vx_to_vx_xor_vy(vm: &mut VirtualMachine, x: usize, y: usize) {
 }
 
 pub fn add_vx_vy(vm: &mut VirtualMachine, x: usize, y: usize) {
-    let result = vm.v[x].0 as u16 + vm.v[y].0 as u16;
-    vm.v[0xF].0 = if result > 255 {1} else {0};
-    vm.v[x].0 = result as u8; // TODO: Are these the lowest 8 bits?
+    vm.v[0xF].0 = if vm.v[x].0 as u16 + vm.v[y].0 as u16 > 255 { 1 } else { 0 };
+    vm.v[x] = vm.v[x] + vm.v[y];
 }
 
 pub fn sub_vx_vy(vm: &mut VirtualMachine, x: usize, y: usize) {
