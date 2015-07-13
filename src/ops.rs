@@ -85,32 +85,32 @@ pub fn subn_vx_vy(vm: &mut VirtualMachine, x: usize, y: usize) {
 }
 
 pub fn set_vx_to_vy_shr_1(vm: &mut VirtualMachine, x: usize, y: usize) {
-    vm.v[0xF].0 = if check_bit(vm.v[y].0, 0) {1} else {0};
+    vm.v[0xF].0 = nth_bit(vm.v[y].0, 7);
     vm.v[x] = vm.v[y] >> 1;
 }
 
 pub fn set_vx_to_vy_shl_1(vm: &mut VirtualMachine, x: usize, y: usize) {
-    vm.v[0xF].0 = if check_bit(vm.v[y].0, 7) {1} else {0};
+    vm.v[0xF].0 = nth_bit(vm.v[y].0, 0);
     vm.v[x] = vm.v[y] << 1;
 }
 
-fn check_bit(byte: u8, pos: usize) -> bool {
-    byte & (1 << pos) != 0
+fn nth_bit(byte: u8, pos: usize) -> u8 {
+    ::bit_set::BitSet::from_bytes(&[byte]).get_ref()[pos] as u8
 }
 
 #[test]
-fn test_check_bit() {
-    assert!(check_bit(0b10000000, 7));
-    for i in 0..7 {
-        assert!(!check_bit(0b10000000, i));
+fn test_nth_bit() {
+    assert_eq!(nth_bit(0b10000000, 0), 1);
+    for i in 1..8 {
+        assert_eq!(nth_bit(0b10000000, i), 0);
     }
-    assert!(check_bit(0b01000000, 6));
-    assert!(check_bit(0b00100000, 5));
-    assert!(check_bit(0b00010000, 4));
-    assert!(check_bit(0b00001000, 3));
-    assert!(check_bit(0b00000100, 2));
-    assert!(check_bit(0b00000010, 1));
-    assert!(check_bit(0b00000001, 0));
+    assert_eq!(nth_bit(0b01000000, 1), 1);
+    assert_eq!(nth_bit(0b00100000, 2), 1);
+    assert_eq!(nth_bit(0b00010000, 3), 1);
+    assert_eq!(nth_bit(0b00001000, 4), 1);
+    assert_eq!(nth_bit(0b00000100, 5), 1);
+    assert_eq!(nth_bit(0b00000010, 6), 1);
+    assert_eq!(nth_bit(0b00000001, 7), 1);
 }
 
 pub fn skip_next_vx_ne_vy(vm: &mut VirtualMachine, x: usize, y: usize) {

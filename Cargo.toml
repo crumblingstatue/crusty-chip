@@ -6,3 +6,4 @@ authors = [ "radiantstatue@gmail.com" ]
 
 [dependencies]
 rand = '*'
+bit-set = "0.2.0"
