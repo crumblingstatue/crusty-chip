@@ -139,8 +139,8 @@ pub fn display_sprite(vm: &mut VirtualMachine, vx: usize, vy: usize, n: usize) {
     for y in 0..n {
         let b = vm.ram[vm.i as usize + y];
         for x in 0..8 {
-            let xx = x + (vm.v[vx].0 as usize % DISPLAY_WIDTH);
-            let yy = y + (vm.v[vy].0 as usize % DISPLAY_HEIGHT);
+            let xx = x + vm.v[vx].0 as usize;
+            let yy = y + vm.v[vy].0 as usize;
 
             if xx < DISPLAY_WIDTH && yy < DISPLAY_HEIGHT {
                 let idx = yy * DISPLAY_WIDTH + xx;
