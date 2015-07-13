@@ -4,9 +4,6 @@
 //! The reference frontend is
 //! [crusty-chip-sfml](https://github.com/crumblingstatue/crusty-chip-sfml).
 //!
-//! The CHIP-8 technical documentation in the comments is copied from
-//! http://devernay.free.fr/hacks/chip8/C8TECH10.HTM,
-//! Copyright (c) Thomas P. Greene.
 
 #![warn(missing_docs)]
 
