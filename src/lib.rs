@@ -254,7 +254,7 @@ impl VirtualMachine {
         Ok(())
     }
 
-    /// Does an emulation cycle.
+    /// Does an interpretation cycle.
     pub fn do_cycle(&mut self) {
         self.display_updated = false;
         if self.keypress_wait.wait {
