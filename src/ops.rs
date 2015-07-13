@@ -83,14 +83,14 @@ pub fn subn_vx_vy(vm: &mut VirtualMachine, x: usize, y: usize) {
     vm.v[x] = vm.v[y] - vm.v[x];
 }
 
-pub fn set_vx_to_vx_shr_1(vm: &mut VirtualMachine, x: usize) {
-    vm.v[0xF].0 = if check_bit(vm.v[x].0, 0) {1} else {0};
-    vm.v[x].0 = vm.v[x].0.wrapping_div(2);
+pub fn set_vx_to_vy_shr_1(vm: &mut VirtualMachine, x: usize, y: usize) {
+    vm.v[0xF].0 = if check_bit(vm.v[y].0, 0) {1} else {0};
+    vm.v[x] = vm.v[y] >> 1;
 }
 
-pub fn set_vx_to_vx_shl_1(vm: &mut VirtualMachine, x: usize) {
-    vm.v[0xF].0 = if check_bit(vm.v[x].0, 7) {1} else {0};
-    vm.v[x] = vm.v[x] * Wrapping(2);
+pub fn set_vx_to_vy_shl_1(vm: &mut VirtualMachine, x: usize, y: usize) {
+    vm.v[0xF].0 = if check_bit(vm.v[y].0, 7) {1} else {0};
+    vm.v[x] = vm.v[y] << 1;
 }
 
 fn check_bit(byte: u8, pos: usize) -> bool {
