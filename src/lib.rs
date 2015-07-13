@@ -1,4 +1,4 @@
-//! CHIP-8 emulator backend.
+//! CHIP-8 interpreter backend.
 //! You can develop your own frontends for it.
 //!
 //! The reference frontend is
