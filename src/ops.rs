@@ -70,17 +70,29 @@ pub fn set_vx_to_vx_xor_vy(vm: &mut VirtualMachine, x: usize, y: usize) {
 }
 
 pub fn add_vx_vy(vm: &mut VirtualMachine, x: usize, y: usize) {
-    vm.v[0xF].0 = if vm.v[x].0 as u16 + vm.v[y].0 as u16 > 255 { 1 } else { 0 };
+    vm.v[0xF].0 = if vm.v[x].0 as u16 + vm.v[y].0 as u16 > 255 {
+        1
+    } else {
+        0
+    };
     vm.v[x] = vm.v[x] + vm.v[y];
 }
 
 pub fn sub_vx_vy(vm: &mut VirtualMachine, x: usize, y: usize) {
-    vm.v[0xF].0 = if vm.v[x] > vm.v[y] {1} else {0};
+    vm.v[0xF].0 = if vm.v[x] > vm.v[y] {
+        1
+    } else {
+        0
+    };
     vm.v[x] = vm.v[x] - vm.v[y];
 }
 
 pub fn subn_vx_vy(vm: &mut VirtualMachine, x: usize, y: usize) {
-    vm.v[0xF].0 = if vm.v[y] > vm.v[x] {1} else {0};
+    vm.v[0xF].0 = if vm.v[y] > vm.v[x] {
+        1
+    } else {
+        0
+    };
     vm.v[x] = vm.v[y] - vm.v[x];
 }
 
@@ -132,7 +144,7 @@ pub fn set_vx_rand_and(vm: &mut VirtualMachine, x: usize, to: u8) {
 }
 
 pub fn display_sprite(vm: &mut VirtualMachine, vx: usize, vy: usize, n: usize) {
-    use super::{ DISPLAY_WIDTH, DISPLAY_HEIGHT };
+    use super::{DISPLAY_WIDTH, DISPLAY_HEIGHT};
 
     vm.v[0xF].0 = 0;
 

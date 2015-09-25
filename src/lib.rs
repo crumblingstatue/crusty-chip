@@ -29,38 +29,120 @@ pub type Semiword = u16;
 pub enum Instruction {
     ClearDisplay,
     Return,
-    JumpToSysRoutine{addr: Semiword},
-    JumpToAddress{addr: Semiword},
-    CallSubroutine{addr: Semiword},
-    SkipNextVxEq{x: Nibble, cmp_with: Byte},
-    SkipNextVxNe{x: Nibble, cmp_with: Byte},
-    SkipNextVxEqVy{x: Nibble, y: Nibble},
-    SetVxByte{x: Nibble, to: Byte},
-    AddVxByte{x: Nibble, rhs: Byte},
-    SetVxToVy{x: Nibble, y: Nibble},
-    SetVxToVxOrVy{x: Nibble, y: Nibble},
-    SetVxToVxAndVy{x: Nibble, y: Nibble},
-    SetVxToVxXorVy{x: Nibble, y: Nibble},
-    AddVxVy{x: Nibble, y: Nibble},
-    SubVxVy{x: Nibble, y: Nibble},
-    SetVxToVyShr1{x: Nibble, y: Nibble},
-    SubnVxVy{x: Nibble, y: Nibble},
-    SetVxToVyShl1{x: Nibble, y: Nibble},
-    SkipNextVxNeVy{x: Nibble, y: Nibble},
-    SetI{to: Semiword},
-    SetVxRandAnd{x: Nibble, and: Byte},
-    DisplaySprite{x: Nibble, y: Nibble, n: Nibble},
-    SkipNextKeyVxNotPressed{x: Nibble},
-    SkipNextKeyVxPressed{x: Nibble},
-    SetVxToDelayTimer{x: Nibble},
-    WaitForKeypressStoreInVx{x: Nibble},
-    SetDelayTimer{x: Nibble},
-    SetSoundTimer{x: Nibble},
-    AddVxToI{x: Nibble},
-    SetIToLocOfDigitVx{x: Nibble},
-    StoreBcdOfVxToI{x: Nibble},
-    CopyV0ThroughVxToMem{x: Nibble},
-    ReadV0ThroughVxFromMem{x: Nibble},
+    JumpToSysRoutine {
+        addr: Semiword,
+    },
+    JumpToAddress {
+        addr: Semiword,
+    },
+    CallSubroutine {
+        addr: Semiword,
+    },
+    SkipNextVxEq {
+        x: Nibble,
+        cmp_with: Byte,
+    },
+    SkipNextVxNe {
+        x: Nibble,
+        cmp_with: Byte,
+    },
+    SkipNextVxEqVy {
+        x: Nibble,
+        y: Nibble,
+    },
+    SetVxByte {
+        x: Nibble,
+        to: Byte,
+    },
+    AddVxByte {
+        x: Nibble,
+        rhs: Byte,
+    },
+    SetVxToVy {
+        x: Nibble,
+        y: Nibble,
+    },
+    SetVxToVxOrVy {
+        x: Nibble,
+        y: Nibble,
+    },
+    SetVxToVxAndVy {
+        x: Nibble,
+        y: Nibble,
+    },
+    SetVxToVxXorVy {
+        x: Nibble,
+        y: Nibble,
+    },
+    AddVxVy {
+        x: Nibble,
+        y: Nibble,
+    },
+    SubVxVy {
+        x: Nibble,
+        y: Nibble,
+    },
+    SetVxToVyShr1 {
+        x: Nibble,
+        y: Nibble,
+    },
+    SubnVxVy {
+        x: Nibble,
+        y: Nibble,
+    },
+    SetVxToVyShl1 {
+        x: Nibble,
+        y: Nibble,
+    },
+    SkipNextVxNeVy {
+        x: Nibble,
+        y: Nibble,
+    },
+    SetI {
+        to: Semiword,
+    },
+    SetVxRandAnd {
+        x: Nibble,
+        and: Byte,
+    },
+    DisplaySprite {
+        x: Nibble,
+        y: Nibble,
+        n: Nibble,
+    },
+    SkipNextKeyVxNotPressed {
+        x: Nibble,
+    },
+    SkipNextKeyVxPressed {
+        x: Nibble,
+    },
+    SetVxToDelayTimer {
+        x: Nibble,
+    },
+    WaitForKeypressStoreInVx {
+        x: Nibble,
+    },
+    SetDelayTimer {
+        x: Nibble,
+    },
+    SetSoundTimer {
+        x: Nibble,
+    },
+    AddVxToI {
+        x: Nibble,
+    },
+    SetIToLocOfDigitVx {
+        x: Nibble,
+    },
+    StoreBcdOfVxToI {
+        x: Nibble,
+    },
+    CopyV0ThroughVxToMem {
+        x: Nibble,
+    },
+    ReadV0ThroughVxFromMem {
+        x: Nibble,
+    },
     Unknown,
 }
 
@@ -83,56 +165,56 @@ pub fn decode(ins: u16) -> Instruction {
         0x0 => match nnn {
             0x0E0 => ClearDisplay,
             0x0EE => Return,
-            _ => JumpToSysRoutine{addr: nnn},
+            _ => JumpToSysRoutine { addr: nnn },
         },
-        0x1 => JumpToAddress{addr: nnn},
-        0x2 => CallSubroutine{addr: nnn},
-        0x3 => SkipNextVxEq{x: x, cmp_with: kk},
-        0x4 => SkipNextVxNe{x: x, cmp_with: kk},
+        0x1 => JumpToAddress { addr: nnn },
+        0x2 => CallSubroutine { addr: nnn },
+        0x3 => SkipNextVxEq { x: x, cmp_with: kk },
+        0x4 => SkipNextVxNe { x: x, cmp_with: kk },
         0x5 => match n {
-            0x0 => SkipNextVxEqVy{x: x, y: y},
+            0x0 => SkipNextVxEqVy { x: x, y: y },
             _ => Unknown,
         },
-        0x6 => SetVxByte{x: x, to: kk},
-        0x7 => AddVxByte{x: x, rhs: kk},
+        0x6 => SetVxByte { x: x, to: kk },
+        0x7 => AddVxByte { x: x, rhs: kk },
         0x8 => match n {
-            0x0 => SetVxToVy{x: x, y: y},
-            0x1 => SetVxToVxOrVy{x: x, y: y},
-            0x2 => SetVxToVxAndVy{x: x, y: y},
-            0x3 => SetVxToVxXorVy{x: x, y: y},
-            0x4 => AddVxVy{x: x, y: y},
-            0x5 => SubVxVy{x: x, y: y},
-            0x6 => SetVxToVyShr1{x: x, y: y},
-            0x7 => SubnVxVy{x: x, y: y},
-            0xE => SetVxToVyShl1{x: x, y: y},
+            0x0 => SetVxToVy { x: x, y: y },
+            0x1 => SetVxToVxOrVy { x: x, y: y },
+            0x2 => SetVxToVxAndVy { x: x, y: y },
+            0x3 => SetVxToVxXorVy { x: x, y: y },
+            0x4 => AddVxVy { x: x, y: y },
+            0x5 => SubVxVy { x: x, y: y },
+            0x6 => SetVxToVyShr1 { x: x, y: y },
+            0x7 => SubnVxVy { x: x, y: y },
+            0xE => SetVxToVyShl1 { x: x, y: y },
             _ => Unknown,
         },
         0x9 => match n {
-            0x0 => SkipNextVxNeVy{x: x, y: y},
+            0x0 => SkipNextVxNeVy { x: x, y: y },
             _ => Unknown,
         },
-        0xA => SetI{to: nnn},
-        0xC => SetVxRandAnd{x: x, and: kk},
-        0xD => DisplaySprite{x: x, y: y, n: n},
+        0xA => SetI { to: nnn },
+        0xC => SetVxRandAnd { x: x, and: kk },
+        0xD => DisplaySprite { x: x, y: y, n: n },
         0xE => match kk {
-            0xA1 => SkipNextKeyVxNotPressed{x: x},
-            0x9E => SkipNextKeyVxPressed{x: x},
+            0xA1 => SkipNextKeyVxNotPressed { x: x },
+            0x9E => SkipNextKeyVxPressed { x: x },
             _ => Unknown,
         },
         0xF => {
             match kk {
-                0x07 => SetVxToDelayTimer{x: x},
-                0x0A => WaitForKeypressStoreInVx{x: x},
-                0x15 => SetDelayTimer{x: x},
-                0x18 => SetSoundTimer{x: x},
-                0x1E => AddVxToI{x: x},
-                0x29 => SetIToLocOfDigitVx{x: x},
-                0x33 => StoreBcdOfVxToI{x: x},
-                0x55 => CopyV0ThroughVxToMem{x: x},
-                0x65 => ReadV0ThroughVxFromMem{x: x},
-                _ => Unknown
+                0x07 => SetVxToDelayTimer { x: x },
+                0x0A => WaitForKeypressStoreInVx { x: x },
+                0x15 => SetDelayTimer { x: x },
+                0x18 => SetSoundTimer { x: x },
+                0x1E => AddVxToI { x: x },
+                0x29 => SetIToLocOfDigitVx { x: x },
+                0x33 => StoreBcdOfVxToI { x: x },
+                0x55 => CopyV0ThroughVxToMem { x: x },
+                0x65 => ReadV0ThroughVxFromMem { x: x },
+                _ => Unknown,
             }
-        },
+        }
         _ => Unknown,
     }
 }
@@ -145,9 +227,7 @@ fn copy_memory(src: &[u8], dst: &mut [u8]) -> Result<(), ()> {
     // `dst` is unaliasable, so we know statically it doesn't overlap
     // with `src`.
     unsafe {
-        std::ptr::copy_nonoverlapping(src.as_ptr(),
-                                      dst.as_mut_ptr(),
-                                      len_src);
+        std::ptr::copy_nonoverlapping(src.as_ptr(), dst.as_mut_ptr(), len_src);
     }
     Ok(())
 }
@@ -159,29 +239,16 @@ pub const DISPLAY_WIDTH: usize = 64;
 /// The height of the Chip8's display in pixels.
 pub const DISPLAY_HEIGHT: usize = 32;
 
-static FONTSET: [u8; 5 * 0x10] = [
-    0xF0, 0x90, 0x90, 0x90, 0xF0, // 0
-    0x20, 0x60, 0x20, 0x20, 0x70, // 1
-    0xF0, 0x10, 0xF0, 0x80, 0xF0, // 2
-    0xF0, 0x10, 0xF0, 0x10, 0xF0, // 3
-    0x90, 0x90, 0xF0, 0x10, 0x10, // 4
-    0xF0, 0x80, 0xF0, 0x10, 0xF0, // 5
-    0xF0, 0x80, 0xF0, 0x90, 0xF0, // 6
-    0xF0, 0x10, 0x20, 0x40, 0x40, // 7
-    0xF0, 0x90, 0xF0, 0x90, 0xF0, // 8
-    0xF0, 0x90, 0xF0, 0x10, 0xF0, // 9
-    0xF0, 0x90, 0xF0, 0x90, 0x90, // A
-    0xE0, 0x90, 0xE0, 0x90, 0xE0, // B
-    0xF0, 0x80, 0x80, 0x80, 0xF0, // C
-    0xE0, 0x90, 0x90, 0x90, 0xE0, // D
-    0xF0, 0x80, 0xF0, 0x80, 0xF0, // E
-    0xF0, 0x80, 0xF0, 0x80, 0x80, // F
-];
+static FONTSET: [u8; 5 * 0x10] = [0xF0, 0x90, 0x90, 0x90, 0xF0, 0x20, 0x60, 0x20, 0x20, 0x70, 0xF0, 0x10, 0xF0, 0x80, 0xF0, 0xF0,
+ 0x10, 0xF0, 0x10, 0xF0, 0x90, 0x90, 0xF0, 0x10, 0x10, 0xF0, 0x80, 0xF0, 0x10, 0xF0, 0xF0, 0x80,
+ 0xF0, 0x90, 0xF0, 0xF0, 0x10, 0x20, 0x40, 0x40, 0xF0, 0x90, 0xF0, 0x90, 0xF0, 0xF0, 0x90, 0xF0,
+ 0x10, 0xF0, 0xF0, 0x90, 0xF0, 0x90, 0x90, 0xE0, 0x90, 0xE0, 0x90, 0xE0, 0xF0, 0x80, 0x80, 0x80,
+ 0xF0, 0xE0, 0x90, 0x90, 0x90, 0xE0, 0xF0, 0x80, 0xF0, 0x80, 0xF0, 0xF0, 0x80, 0xF0, 0x80, 0x80];
 
 #[derive(Clone, Copy)]
 struct KeypressWait {
     wait: bool,
-    vx: usize
+    vx: usize,
 }
 
 macro_rules! array_wrap (
@@ -218,7 +285,7 @@ pub struct VirtualMachine {
     display: DisplayArray,
     display_updated: bool,
     keys: [bool; 16],
-    keypress_wait: KeypressWait
+    keypress_wait: KeypressWait,
 }
 
 impl VirtualMachine {
@@ -237,10 +304,7 @@ impl VirtualMachine {
             display: DisplayArray([0; DISPLAY_WIDTH * DISPLAY_HEIGHT]),
             display_updated: false,
             keys: [false; 16],
-            keypress_wait: KeypressWait {
-                wait: false,
-                vx: 0
-            }
+            keypress_wait: KeypressWait { wait: false, vx: 0 },
         };
         copy_memory(&FONTSET, &mut ch8.ram[0usize..5 * 0x10])
             .ok()
@@ -363,7 +427,11 @@ impl VirtualMachine {
     }
 
     /// Returns whether the display has been updated.
-    pub fn display_updated(&self) -> bool { self.display_updated }
+    pub fn display_updated(&self) -> bool {
+        self.display_updated
+    }
     /// Returns the contents of the display.
-    pub fn display(&self) -> &[u8; DISPLAY_WIDTH * DISPLAY_HEIGHT] { &*self.display }
+    pub fn display(&self) -> &[u8; DISPLAY_WIDTH * DISPLAY_HEIGHT] {
+        &*self.display
+    }
 }
