@@ -5,7 +5,7 @@
 //! [crusty-chip-sfml](https://github.com/crumblingstatue/crusty-chip-sfml).
 //!
 
-#![feature(range_inclusive)]
+#![feature(range_inclusive, clone_from_slice)]
 
 #![warn(missing_docs)]
 
@@ -225,19 +225,6 @@ pub fn decode(ins: u16) -> Instruction {
     }
 }
 
-fn copy_memory(src: &[u8], dst: &mut [u8]) -> Result<(), ()> {
-    let len_src = src.len();
-    if !(dst.len() >= len_src) {
-        return Err(());
-    }
-    // `dst` is unaliasable, so we know statically it doesn't overlap
-    // with `src`.
-    unsafe {
-        std::ptr::copy_nonoverlapping(src.as_ptr(), dst.as_mut_ptr(), len_src);
-    }
-    Ok(())
-}
-
 const START_ADDR: u16 = 0x200;
 const MEM_SIZE: usize = 4096;
 /// The width of the Chip8's display in pixels.
@@ -318,9 +305,7 @@ impl VirtualMachine {
                 vx: 0,
             },
         };
-        copy_memory(&FONTSET, &mut ch8.ram[0usize..5 * 0x10])
-            .ok()
-            .expect("Couldn't copy fontset");
+        ch8.ram[0usize..5 * 0x10].clone_from_slice(&FONTSET);
         ch8
     }
 
@@ -330,7 +315,7 @@ impl VirtualMachine {
     /// * rom - ROM to load
     pub fn load_rom(&mut self, rom: &[u8]) -> Result<(), ()> {
         let len = self.ram.len();
-        try!(copy_memory(rom, &mut self.ram[START_ADDR as usize..len]));
+        self.ram[START_ADDR as usize..len].clone_from_slice(rom);
         Ok(())
     }
 
