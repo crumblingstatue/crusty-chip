@@ -162,51 +162,65 @@ pub fn decode(ins: u16) -> Instruction {
     let kk: Byte = (ins & 0x00FF) as Nibble;
 
     match (ins & 0xF000) >> 12 {
-        0x0 => match nnn {
-            0x0E0 => ClearDisplay,
-            0x0EE => Return,
-            _ => JumpToSysRoutine { addr: nnn },
-        },
+        0x0 => {
+            match nnn {
+                0x0E0 => ClearDisplay,
+                0x0EE => Return,
+                _ => JumpToSysRoutine { addr: nnn },
+            }
+        }
         0x1 => JumpToAddress { addr: nnn },
         0x2 => CallSubroutine { addr: nnn },
-        0x3 => SkipNextVxEq {
-            x: x,
-            cmp_with: kk,
-        },
-        0x4 => SkipNextVxNe {
-            x: x,
-            cmp_with: kk,
-        },
-        0x5 => match n {
-            0x0 => SkipNextVxEqVy { x: x, y: y },
-            _ => Unknown,
-        },
+        0x3 => {
+            SkipNextVxEq {
+                x: x,
+                cmp_with: kk,
+            }
+        }
+        0x4 => {
+            SkipNextVxNe {
+                x: x,
+                cmp_with: kk,
+            }
+        }
+        0x5 => {
+            match n {
+                0x0 => SkipNextVxEqVy { x: x, y: y },
+                _ => Unknown,
+            }
+        }
         0x6 => SetVxByte { x: x, to: kk },
         0x7 => AddVxByte { x: x, rhs: kk },
-        0x8 => match n {
-            0x0 => SetVxToVy { x: x, y: y },
-            0x1 => SetVxToVxOrVy { x: x, y: y },
-            0x2 => SetVxToVxAndVy { x: x, y: y },
-            0x3 => SetVxToVxXorVy { x: x, y: y },
-            0x4 => AddVxVy { x: x, y: y },
-            0x5 => SubVxVy { x: x, y: y },
-            0x6 => SetVxToVyShr1 { x: x, y: y },
-            0x7 => SubnVxVy { x: x, y: y },
-            0xE => SetVxToVyShl1 { x: x, y: y },
-            _ => Unknown,
-        },
-        0x9 => match n {
-            0x0 => SkipNextVxNeVy { x: x, y: y },
-            _ => Unknown,
-        },
+        0x8 => {
+            match n {
+                0x0 => SetVxToVy { x: x, y: y },
+                0x1 => SetVxToVxOrVy { x: x, y: y },
+                0x2 => SetVxToVxAndVy { x: x, y: y },
+                0x3 => SetVxToVxXorVy { x: x, y: y },
+                0x4 => AddVxVy { x: x, y: y },
+                0x5 => SubVxVy { x: x, y: y },
+                0x6 => SetVxToVyShr1 { x: x, y: y },
+                0x7 => SubnVxVy { x: x, y: y },
+                0xE => SetVxToVyShl1 { x: x, y: y },
+                _ => Unknown,
+            }
+        }
+        0x9 => {
+            match n {
+                0x0 => SkipNextVxNeVy { x: x, y: y },
+                _ => Unknown,
+            }
+        }
         0xA => SetI { to: nnn },
         0xC => SetVxRandAnd { x: x, and: kk },
         0xD => DisplaySprite { x: x, y: y, n: n },
-        0xE => match kk {
-            0xA1 => SkipNextKeyVxNotPressed { x: x },
-            0x9E => SkipNextKeyVxPressed { x: x },
-            _ => Unknown,
-        },
+        0xE => {
+            match kk {
+                0xA1 => SkipNextKeyVxNotPressed { x: x },
+                0x9E => SkipNextKeyVxPressed { x: x },
+                _ => Unknown,
+            }
+        }
         0xF => {
             match kk {
                 0x07 => SetVxToDelayTimer { x: x },
@@ -285,7 +299,6 @@ pub struct VirtualMachine {
 }
 
 impl VirtualMachine {
-
     /// Constructs a new VirtualMachine.
     pub fn new() -> VirtualMachine {
         let mut ch8 = VirtualMachine {
