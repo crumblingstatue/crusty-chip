@@ -327,8 +327,8 @@ impl VirtualMachine {
     /// ## Arguments ##
     /// * rom - ROM to load
     pub fn load_rom(&mut self, rom: &[u8]) -> Result<(), ()> {
-        let len = self.ram.len();
-        self.ram[START_ADDR as usize..len].clone_from_slice(rom);
+        let len = rom.len();
+        self.ram[START_ADDR as usize..START_ADDR as usize + len].clone_from_slice(rom);
         Ok(())
     }
 
