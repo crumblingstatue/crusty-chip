@@ -11,6 +11,7 @@
 
 use std::num::Wrapping;
 use std::ops::{Deref, DerefMut};
+use std::{fmt, error};
 
 mod ops;
 
@@ -298,6 +299,34 @@ pub struct VirtualMachine {
     keypress_wait: KeypressWait,
 }
 
+/// Error that can happen when loading a rom.
+#[derive(Debug)]
+pub enum RomLoadError {
+    /// Rom is too big
+    TooBig(usize),
+}
+
+const MAX_ROM_LEN: usize = MEM_SIZE - START_ADDR as usize;
+
+impl fmt::Display for RomLoadError {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match *self {
+            RomLoadError::TooBig(size) => {
+                write!(f,
+                       "Rom size ({}) is too big. The maximum valid rom size is {}.",
+                       size,
+                       MAX_ROM_LEN)
+            }
+        }
+    }
+}
+
+impl error::Error for RomLoadError {
+    fn description(&self) -> &'static str {
+        "rom load error"
+    }
+}
+
 impl VirtualMachine {
     /// Constructs a new VirtualMachine.
     pub fn new() -> VirtualMachine {
@@ -326,8 +355,11 @@ impl VirtualMachine {
     ///
     /// ## Arguments ##
     /// * rom - ROM to load
-    pub fn load_rom(&mut self, rom: &[u8]) -> Result<(), ()> {
+    pub fn load_rom(&mut self, rom: &[u8]) -> Result<(), RomLoadError> {
         let len = rom.len();
+        if len > MAX_ROM_LEN {
+            return Err(RomLoadError::TooBig(len));
+        }
         self.ram[START_ADDR as usize..START_ADDR as usize + len].clone_from_slice(rom);
         Ok(())
     }
