@@ -11,7 +11,7 @@
 
 use std::num::Wrapping;
 use std::ops::{Deref, DerefMut};
-use std::{fmt, error};
+use std::{error, fmt};
 
 mod ops;
 

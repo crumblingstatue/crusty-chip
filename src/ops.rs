@@ -144,7 +144,7 @@ pub fn set_vx_rand_and(vm: &mut VirtualMachine, x: usize, to: u8) {
 }
 
 pub fn display_sprite(vm: &mut VirtualMachine, vx: usize, vy: usize, n: usize) {
-    use super::{DISPLAY_WIDTH, DISPLAY_HEIGHT};
+    use super::{DISPLAY_HEIGHT, DISPLAY_WIDTH};
 
     vm.v[0xF].0 = 0;
 
