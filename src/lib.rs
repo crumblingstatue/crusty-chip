@@ -5,7 +5,7 @@
 //! [crusty-chip-sfml](https://github.com/crumblingstatue/crusty-chip-sfml).
 //!
 
-#![feature(range_inclusive)]
+#![feature(range_inclusive, copy_from_slice)]
 
 #![warn(missing_docs)]
 
@@ -347,7 +347,7 @@ impl VirtualMachine {
                 vx: 0,
             },
         };
-        ch8.ram[0usize..5 * 0x10].clone_from_slice(&FONTSET);
+        ch8.ram[0usize..5 * 0x10].copy_from_slice(&FONTSET);
         ch8
     }
 
@@ -360,7 +360,7 @@ impl VirtualMachine {
         if len > MAX_ROM_LEN {
             return Err(RomLoadError::TooBig(len));
         }
-        self.ram[START_ADDR as usize..START_ADDR as usize + len].clone_from_slice(rom);
+        self.ram[START_ADDR as usize..START_ADDR as usize + len].copy_from_slice(rom);
         Ok(())
     }
 
