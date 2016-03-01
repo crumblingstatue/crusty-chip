@@ -107,7 +107,8 @@ pub fn set_vx_to_vy_shl_1(vm: &mut VirtualMachine, x: usize, y: usize) {
 }
 
 fn nth_bit(byte: u8, pos: usize) -> u8 {
-    ::bit_set::BitSet::from_bytes(&[byte]).get_ref()[pos] as u8
+    use bit_utils::BitInformation;
+    if byte.has_x_bit(7 - pos) { 1 } else { 0 }
 }
 
 #[test]
