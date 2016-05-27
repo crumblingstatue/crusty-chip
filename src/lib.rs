@@ -5,7 +5,7 @@
 //! [crusty-chip-sfml](https://github.com/crumblingstatue/crusty-chip-sfml).
 //!
 
-#![feature(inclusive_range_syntax, copy_from_slice)]
+#![feature(inclusive_range_syntax)]
 
 #![warn(missing_docs)]
 
