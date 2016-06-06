@@ -327,6 +327,12 @@ impl error::Error for RomLoadError {
     }
 }
 
+impl Default for VirtualMachine {
+    fn default() -> Self {
+        VirtualMachine::new()
+    }
+}
+
 impl VirtualMachine {
     /// Constructs a new VirtualMachine.
     pub fn new() -> VirtualMachine {
