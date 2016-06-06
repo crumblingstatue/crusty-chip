@@ -30,120 +30,38 @@ pub type Semiword = u16;
 pub enum Instruction {
     ClearDisplay,
     Return,
-    JumpToSysRoutine {
-        addr: Semiword,
-    },
-    JumpToAddress {
-        addr: Semiword,
-    },
-    CallSubroutine {
-        addr: Semiword,
-    },
-    SkipNextVxEq {
-        x: Nibble,
-        cmp_with: Byte,
-    },
-    SkipNextVxNe {
-        x: Nibble,
-        cmp_with: Byte,
-    },
-    SkipNextVxEqVy {
-        x: Nibble,
-        y: Nibble,
-    },
-    SetVxByte {
-        x: Nibble,
-        to: Byte,
-    },
-    AddVxByte {
-        x: Nibble,
-        rhs: Byte,
-    },
-    SetVxToVy {
-        x: Nibble,
-        y: Nibble,
-    },
-    SetVxToVxOrVy {
-        x: Nibble,
-        y: Nibble,
-    },
-    SetVxToVxAndVy {
-        x: Nibble,
-        y: Nibble,
-    },
-    SetVxToVxXorVy {
-        x: Nibble,
-        y: Nibble,
-    },
-    AddVxVy {
-        x: Nibble,
-        y: Nibble,
-    },
-    SubVxVy {
-        x: Nibble,
-        y: Nibble,
-    },
-    SetVxToVyShr1 {
-        x: Nibble,
-        y: Nibble,
-    },
-    SubnVxVy {
-        x: Nibble,
-        y: Nibble,
-    },
-    SetVxToVyShl1 {
-        x: Nibble,
-        y: Nibble,
-    },
-    SkipNextVxNeVy {
-        x: Nibble,
-        y: Nibble,
-    },
-    SetI {
-        to: Semiword,
-    },
-    SetVxRandAnd {
-        x: Nibble,
-        and: Byte,
-    },
-    DisplaySprite {
-        x: Nibble,
-        y: Nibble,
-        n: Nibble,
-    },
-    SkipNextKeyVxNotPressed {
-        x: Nibble,
-    },
-    SkipNextKeyVxPressed {
-        x: Nibble,
-    },
-    SetVxToDelayTimer {
-        x: Nibble,
-    },
-    WaitForKeypressStoreInVx {
-        x: Nibble,
-    },
-    SetDelayTimer {
-        x: Nibble,
-    },
-    SetSoundTimer {
-        x: Nibble,
-    },
-    AddVxToI {
-        x: Nibble,
-    },
-    SetIToLocOfDigitVx {
-        x: Nibble,
-    },
-    StoreBcdOfVxToI {
-        x: Nibble,
-    },
-    CopyV0ThroughVxToMem {
-        x: Nibble,
-    },
-    ReadV0ThroughVxFromMem {
-        x: Nibble,
-    },
+    JumpToSysRoutine { addr: Semiword },
+    JumpToAddress { addr: Semiword },
+    CallSubroutine { addr: Semiword },
+    SkipNextVxEq { x: Nibble, cmp_with: Byte },
+    SkipNextVxNe { x: Nibble, cmp_with: Byte },
+    SkipNextVxEqVy { x: Nibble, y: Nibble },
+    SetVxByte { x: Nibble, to: Byte },
+    AddVxByte { x: Nibble, rhs: Byte },
+    SetVxToVy { x: Nibble, y: Nibble },
+    SetVxToVxOrVy { x: Nibble, y: Nibble },
+    SetVxToVxAndVy { x: Nibble, y: Nibble },
+    SetVxToVxXorVy { x: Nibble, y: Nibble },
+    AddVxVy { x: Nibble, y: Nibble },
+    SubVxVy { x: Nibble, y: Nibble },
+    SetVxToVyShr1 { x: Nibble, y: Nibble },
+    SubnVxVy { x: Nibble, y: Nibble },
+    SetVxToVyShl1 { x: Nibble, y: Nibble },
+    SkipNextVxNeVy { x: Nibble, y: Nibble },
+    SetI { to: Semiword },
+    SetVxRandAnd { x: Nibble, and: Byte },
+    DisplaySprite { x: Nibble, y: Nibble, n: Nibble },
+    SkipNextKeyVxNotPressed { x: Nibble },
+    SkipNextKeyVxPressed { x: Nibble },
+    SetVxToDelayTimer { x: Nibble },
+    WaitForKeypressStoreInVx { x: Nibble },
+    SetDelayTimer { x: Nibble },
+    SetSoundTimer { x: Nibble },
+    AddVxToI { x: Nibble },
+    SetIToLocOfDigitVx { x: Nibble },
+    StoreBcdOfVxToI { x: Nibble },
+    CopyV0ThroughVxToMem { x: Nibble },
+    ReadV0ThroughVxFromMem { x: Nibble },
     Unknown,
 }
 
@@ -247,14 +165,13 @@ pub const DISPLAY_WIDTH: usize = 64;
 /// The height of the Chip8's display in pixels.
 pub const DISPLAY_HEIGHT: usize = 32;
 
-static FONTSET: [u8; 5 * 0x10] = [0xF0, 0x90, 0x90, 0x90, 0xF0, 0x20, 0x60, 0x20, 0x20, 0x70,
-                                  0xF0, 0x10, 0xF0, 0x80, 0xF0, 0xF0, 0x10, 0xF0, 0x10, 0xF0,
-                                  0x90, 0x90, 0xF0, 0x10, 0x10, 0xF0, 0x80, 0xF0, 0x10, 0xF0,
-                                  0xF0, 0x80, 0xF0, 0x90, 0xF0, 0xF0, 0x10, 0x20, 0x40, 0x40,
-                                  0xF0, 0x90, 0xF0, 0x90, 0xF0, 0xF0, 0x90, 0xF0, 0x10, 0xF0,
-                                  0xF0, 0x90, 0xF0, 0x90, 0x90, 0xE0, 0x90, 0xE0, 0x90, 0xE0,
-                                  0xF0, 0x80, 0x80, 0x80, 0xF0, 0xE0, 0x90, 0x90, 0x90, 0xE0,
-                                  0xF0, 0x80, 0xF0, 0x80, 0xF0, 0xF0, 0x80, 0xF0, 0x80, 0x80];
+static FONTSET: [u8; 5 * 0x10] =
+    [0xF0, 0x90, 0x90, 0x90, 0xF0, 0x20, 0x60, 0x20, 0x20, 0x70, 0xF0, 0x10, 0xF0, 0x80, 0xF0,
+     0xF0, 0x10, 0xF0, 0x10, 0xF0, 0x90, 0x90, 0xF0, 0x10, 0x10, 0xF0, 0x80, 0xF0, 0x10, 0xF0,
+     0xF0, 0x80, 0xF0, 0x90, 0xF0, 0xF0, 0x10, 0x20, 0x40, 0x40, 0xF0, 0x90, 0xF0, 0x90, 0xF0,
+     0xF0, 0x90, 0xF0, 0x10, 0xF0, 0xF0, 0x90, 0xF0, 0x90, 0x90, 0xE0, 0x90, 0xE0, 0x90, 0xE0,
+     0xF0, 0x80, 0x80, 0x80, 0xF0, 0xE0, 0x90, 0x90, 0x90, 0xE0, 0xF0, 0x80, 0xF0, 0x80, 0xF0,
+     0xF0, 0x80, 0xF0, 0x80, 0x80];
 
 #[derive(Clone, Copy)]
 struct KeypressWait {

@@ -78,20 +78,12 @@ pub fn add_vx_vy(vm: &mut VirtualMachine, x: usize, y: usize) {
 }
 
 pub fn sub_vx_vy(vm: &mut VirtualMachine, x: usize, y: usize) {
-    vm.v[0xF].0 = if vm.v[x] > vm.v[y] {
-        1
-    } else {
-        0
-    };
+    vm.v[0xF].0 = if vm.v[x] > vm.v[y] { 1 } else { 0 };
     vm.v[x] = vm.v[x] - vm.v[y];
 }
 
 pub fn subn_vx_vy(vm: &mut VirtualMachine, x: usize, y: usize) {
-    vm.v[0xF].0 = if vm.v[y] > vm.v[x] {
-        1
-    } else {
-        0
-    };
+    vm.v[0xF].0 = if vm.v[y] > vm.v[x] { 1 } else { 0 };
     vm.v[x] = vm.v[y] - vm.v[x];
 }
 
