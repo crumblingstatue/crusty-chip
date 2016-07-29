@@ -1,0 +1,12 @@
+[package]
+
+name = "crusty-chip-sfml"
+version = "0.1.0"
+authors = [ "radiantstatue@gmail.com" ]
+
+[dependencies.crusty_chip]
+path = "../"
+
+[dependencies]
+sfml = "0.11.1"
+getopts = "0.2.14"

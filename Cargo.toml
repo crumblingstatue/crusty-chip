@@ -7,3 +7,6 @@ authors = [ "radiantstatue@gmail.com" ]
 [dependencies]
 rand = "0.3.14"
 bit_utils = "0.1.0"
+
+[workspace]
+members = ["sfml"]
