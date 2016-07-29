@@ -52,13 +52,22 @@ fn run() -> i32 {
             return 1;
         }
     };
-    let mut data = Vec::new();
-    file.read_to_end(&mut data).unwrap_or_else(|e| panic!("Failed to read rom: {}", e));
+
+    if file.metadata().unwrap().len() > crusty_chip::MEM_SIZE as u64 {
+        let _ = writeln!(stderr,
+                         "File \"{}\" is too big to be a proper CHIP-8 ROM.",
+                         filename);
+        return 1;
+    }
+
+    let mut data = [0; crusty_chip::MEM_SIZE];
+    // TODO: Dunno if this always reads the whole file
+    let bytes_read = file.read(&mut data).unwrap_or_else(|e| panic!("Failed to read rom: {}", e));
 
     let scale = 10;
 
     let mut ch8 = VirtualMachine::new();
-    match ch8.load_rom(&data) {
+    match ch8.load_rom(&data[..bytes_read]) {
         Ok(data) => data,
         Err(e) => {
             let _ = writeln!(stderr, "Error loading rom: \"{}\". Aborting.", e);
