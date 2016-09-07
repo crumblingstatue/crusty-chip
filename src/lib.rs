@@ -9,9 +9,9 @@
 
 #![warn(missing_docs)]
 
+use std::{error, fmt};
 use std::num::Wrapping;
 use std::ops::{Deref, DerefMut};
-use std::{error, fmt};
 
 mod ops;
 

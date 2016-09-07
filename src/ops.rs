@@ -1,5 +1,5 @@
-use super::VirtualMachine;
 use std::num::Wrapping;
+use super::VirtualMachine;
 
 pub fn jump_to_sys_routine(_vm: &mut VirtualMachine, _addr: usize) {
     // Do nothing
