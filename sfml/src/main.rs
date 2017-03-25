@@ -10,7 +10,7 @@ fn usage(progname: &str, opts: &Options) -> String {
 }
 
 fn run() -> i32 {
-    use sfml::window::{ContextSettings, VideoMode, event, window_style};
+    use sfml::window::{ContextSettings, Event, VideoMode, style};
     use sfml::graphics::{Color, RenderTarget, RenderWindow, Sprite, Texture, Transformable};
     use sfml::system::Clock;
     use std::fs::File;
@@ -43,7 +43,7 @@ fn run() -> i32 {
         }
     };
 
-    let mut clock = Clock::new();
+    let mut clock = Clock::start();
 
     let mut file = match File::open(&filename) {
         Ok(f) => f,
@@ -76,13 +76,13 @@ fn run() -> i32 {
     }
 
     let ctx = ContextSettings::default();
-    let mut win = RenderWindow::new(VideoMode::new_init(DISPLAY_WIDTH as u32 * scale,
-                                                        DISPLAY_HEIGHT as u32 * scale,
-                                                        32),
+    let mut win = RenderWindow::new(VideoMode::new(DISPLAY_WIDTH as u32 * scale,
+                                                   DISPLAY_HEIGHT as u32 * scale,
+                                                   32),
                                     "CrustyChip",
-                                    window_style::CLOSE,
+                                    style::CLOSE,
                                     &ctx)
-        .unwrap();
+            .unwrap();
 
     let mut tex = Texture::new(DISPLAY_WIDTH as u32, DISPLAY_HEIGHT as u32).unwrap();
 
@@ -119,8 +119,8 @@ fn run() -> i32 {
                 }
             }
             match event {
-                event::Closed => return 0,
-                event::KeyPressed { code, ctrl, shift, .. } => {
+                Event::Closed => return 0,
+                Event::KeyPressed { code, ctrl, shift, .. } => {
                     if code == Key::P {
                         paused = !paused;
                     } else if code == Key::R && ctrl {
@@ -155,12 +155,12 @@ fn run() -> i32 {
                     state_key!(8, F9);
                     state_key!(9, F10);
                 }
-                event::KeyReleased { code, .. } => {
+                Event::KeyReleased { code, .. } => {
                     if let Some(key) = key_mapping(code) {
                         ch8.release_key(key);
                     }
                 }
-                event::GainedFocus => redisplay = true,
+                Event::GainedFocus => redisplay = true,
                 _ => {}
             }
         }
@@ -169,7 +169,7 @@ fn run() -> i32 {
             win.display();
         }
 
-        if clock.get_elapsed_time().as_seconds() >= 1.0 / 60.0 {
+        if clock.elapsed_time().as_seconds() >= 1.0 / 60.0 {
             ch8.decrement_timers();
             clock.restart();
         }
@@ -207,7 +207,7 @@ fn run() -> i32 {
             }
 
             tex.update_from_pixels(&pixels, DISPLAY_WIDTH as u32, DISPLAY_HEIGHT as u32, 0, 0);
-            let mut sprite = Sprite::new_with_texture(&tex).unwrap();
+            let mut sprite = Sprite::with_texture(&tex);
             sprite.set_scale2f(scale as f32, scale as f32);
             win.draw(&sprite);
             win.display();
