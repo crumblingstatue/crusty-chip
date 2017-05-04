@@ -1,3 +1,3 @@
-write-mode = "overwrite"
-reorder-imports = true
-reorder-imported-names = true
+write_mode = "overwrite"
+reorder_imports = true
+reorder_imported-names = true
