@@ -52,13 +52,17 @@ fn run() -> i32 {
     };
 
     if file.metadata().unwrap().len() > crusty_chip::MEM_SIZE as u64 {
-        eprintln!("File \"{}\" is too big to be a proper CHIP-8 ROM.", filename);
+        eprintln!(
+            "File \"{}\" is too big to be a proper CHIP-8 ROM.",
+            filename
+        );
         return 1;
     }
 
     let mut data = [0; crusty_chip::MEM_SIZE];
     // TODO: Dunno if this always reads the whole file
-    let bytes_read = file.read(&mut data).unwrap_or_else(|e| panic!("Failed to read rom: {}", e));
+    let bytes_read = file.read(&mut data)
+        .unwrap_or_else(|e| panic!("Failed to read rom: {}", e));
 
     let scale = 10;
 
@@ -72,12 +76,16 @@ fn run() -> i32 {
     }
 
     let ctx = ContextSettings::default();
-    let mut win = RenderWindow::new(VideoMode::new(DISPLAY_WIDTH as u32 * scale,
-                                                   DISPLAY_HEIGHT as u32 * scale,
-                                                   32),
-                                    "CrustyChip",
-                                    style::CLOSE,
-                                    &ctx)
+    let mut win = RenderWindow::new(
+        VideoMode::new(
+            DISPLAY_WIDTH as u32 * scale,
+            DISPLAY_HEIGHT as u32 * scale,
+            32,
+        ),
+        "CrustyChip",
+        style::CLOSE,
+        &ctx,
+    )
             .unwrap();
 
     let mut tex = Texture::new(DISPLAY_WIDTH as u32, DISPLAY_HEIGHT as u32).unwrap();
@@ -176,11 +184,13 @@ fn run() -> i32 {
 
         if paused && !printed_info {
             let raw_ins = ch8.get_ins();
-            println!("Cycle {}, pc @ {:x}, ins: {:?} ({:x})",
-                     cycles_made,
-                     ch8.pc(),
-                     decode(raw_ins),
-                     raw_ins);
+            println!(
+                "Cycle {}, pc @ {:x}, ins: {:?} ({:x})",
+                cycles_made,
+                ch8.pc(),
+                decode(raw_ins),
+                raw_ins
+            );
             printed_info = true;
         }
 
