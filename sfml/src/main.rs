@@ -14,10 +14,8 @@ fn run() -> i32 {
     use sfml::graphics::{Color, RenderTarget, RenderWindow, Sprite, Texture, Transformable};
     use sfml::system::Clock;
     use std::fs::File;
-    use std::io::{Read, Write};
+    use std::io::Read;
     use crusty_chip::{DISPLAY_HEIGHT, DISPLAY_WIDTH, VirtualMachine, decode};
-
-    let stderr = &mut std::io::stderr();
 
     let mut args = std::env::args();
     let progname = args.next().expect("Missing program name?");
@@ -27,7 +25,7 @@ fn run() -> i32 {
     let matches = match opts.parse(args) {
         Ok(matches) => matches,
         Err(e) => {
-            let _ = writeln!(stderr, "{}\n\n{}", e, usage(&progname, &opts));
+            eprintln!("{}\n\n{}", e, usage(&progname, &opts));
             return 1;
         }
     };
@@ -37,8 +35,8 @@ fn run() -> i32 {
     let filename = match matches.free.get(0) {
         Some(filename) => filename,
         None => {
-            let _ = writeln!(stderr, "Required filename as first positional argument.\n");
-            let _ = writeln!(stderr, "{}", usage(&progname, &opts));
+            eprintln!("Required filename as first positional argument.\n");
+            eprintln!("{}", usage(&progname, &opts));
             return 1;
         }
     };
@@ -48,15 +46,13 @@ fn run() -> i32 {
     let mut file = match File::open(&filename) {
         Ok(f) => f,
         Err(e) => {
-            let _ = writeln!(stderr, "Failed to open \"{}\": {}", filename, e);
+            eprintln!("Failed to open \"{}\": {}", filename, e);
             return 1;
         }
     };
 
     if file.metadata().unwrap().len() > crusty_chip::MEM_SIZE as u64 {
-        let _ = writeln!(stderr,
-                         "File \"{}\" is too big to be a proper CHIP-8 ROM.",
-                         filename);
+        eprintln!("File \"{}\" is too big to be a proper CHIP-8 ROM.", filename);
         return 1;
     }
 
@@ -70,7 +66,7 @@ fn run() -> i32 {
     match ch8.load_rom(&data[..bytes_read]) {
         Ok(data) => data,
         Err(e) => {
-            let _ = writeln!(stderr, "Error loading rom: \"{}\". Aborting.", e);
+            eprintln!("Error loading rom: \"{}\". Aborting.", e);
             return 1;
         }
     }
@@ -136,10 +132,10 @@ fn run() -> i32 {
                             if code == Key::$k {
                                 if shift {
                                     saved_states[$s] = Some(ch8);
-                                    println!("Saved state {}.", $s);
+                                    eprintln!("Saved state {}.", $s);
                                 } else if let Some(state) = saved_states[$s] {
                                     ch8 = state;
-                                    println!("Loaded state {}.", $s);
+                                    eprintln!("Loaded state {}.", $s);
                                 }
                             }
                         )
