@@ -99,7 +99,11 @@ pub fn set_vx_to_vy_shl_1(vm: &mut VirtualMachine, x: usize, y: usize) {
 
 fn nth_bit(byte: u8, pos: usize) -> u8 {
     use bit_utils::BitInformation;
-    if byte.has_x_bit(7 - pos) { 1 } else { 0 }
+    if byte.has_x_bit(7 - pos) {
+        1
+    } else {
+        0
+    }
 }
 
 #[test]
