@@ -49,7 +49,7 @@ pub fn set_vx_byte(vm: &mut VirtualMachine, x: usize, byte: u8) {
 }
 
 pub fn add_vx_byte(vm: &mut VirtualMachine, x: usize, byte: u8) {
-    vm.v[x] = vm.v[x] + Wrapping(byte);
+    vm.v[x] += Wrapping(byte);
 }
 
 pub fn set_vx_to_vy(vm: &mut VirtualMachine, x: usize, y: usize) {
@@ -57,15 +57,15 @@ pub fn set_vx_to_vy(vm: &mut VirtualMachine, x: usize, y: usize) {
 }
 
 pub fn set_vx_to_vx_or_vy(vm: &mut VirtualMachine, x: usize, y: usize) {
-    vm.v[x] = vm.v[x] | vm.v[y];
+    vm.v[x] |= vm.v[y];
 }
 
 pub fn set_vx_to_vx_and_vy(vm: &mut VirtualMachine, x: usize, y: usize) {
-    vm.v[x] = vm.v[x] & vm.v[y];
+    vm.v[x] &= vm.v[y];
 }
 
 pub fn set_vx_to_vx_xor_vy(vm: &mut VirtualMachine, x: usize, y: usize) {
-    vm.v[x] = vm.v[x] ^ vm.v[y];
+    vm.v[x] ^= vm.v[y];
 }
 
 pub fn add_vx_vy(vm: &mut VirtualMachine, x: usize, y: usize) {
@@ -74,12 +74,12 @@ pub fn add_vx_vy(vm: &mut VirtualMachine, x: usize, y: usize) {
     } else {
         0
     };
-    vm.v[x] = vm.v[x] + vm.v[y];
+    vm.v[x] += vm.v[y];
 }
 
 pub fn sub_vx_vy(vm: &mut VirtualMachine, x: usize, y: usize) {
     vm.v[0xF].0 = if vm.v[x] > vm.v[y] { 1 } else { 0 };
-    vm.v[x] = vm.v[x] - vm.v[y];
+    vm.v[x] -= vm.v[y];
 }
 
 pub fn subn_vx_vy(vm: &mut VirtualMachine, x: usize, y: usize) {
