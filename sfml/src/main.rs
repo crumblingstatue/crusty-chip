@@ -85,8 +85,7 @@ fn run() -> i32 {
         "CrustyChip",
         style::CLOSE,
         &ctx,
-    )
-            .unwrap();
+    ).unwrap();
 
     let mut tex = Texture::new(DISPLAY_WIDTH as u32, DISPLAY_HEIGHT as u32).unwrap();
 
