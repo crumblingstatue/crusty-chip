@@ -1,6 +1,6 @@
 extern crate crusty_chip;
-extern crate sfml;
 extern crate getopts;
+extern crate sfml;
 
 use getopts::Options;
 
@@ -10,12 +10,12 @@ fn usage(progname: &str, opts: &Options) -> String {
 }
 
 fn run() -> i32 {
-    use sfml::window::{ContextSettings, Event, VideoMode, style};
+    use crusty_chip::{decode, VirtualMachine, DISPLAY_HEIGHT, DISPLAY_WIDTH};
     use sfml::graphics::{Color, RenderTarget, RenderWindow, Sprite, Texture, Transformable};
     use sfml::system::Clock;
+    use sfml::window::{style, ContextSettings, Event, VideoMode};
     use std::fs::File;
     use std::io::Read;
-    use crusty_chip::{DISPLAY_HEIGHT, DISPLAY_WIDTH, VirtualMachine, decode};
 
     let mut args = std::env::args();
     let progname = args.next().expect("Missing program name?");
@@ -123,7 +123,9 @@ fn run() -> i32 {
             }
             match event {
                 Event::Closed => return 0,
-                Event::KeyPressed { code, ctrl, shift, .. } => {
+                Event::KeyPressed {
+                    code, ctrl, shift, ..
+                } => {
                     if code == Key::P {
                         paused = !paused;
                     } else if code == Key::R && ctrl {
@@ -158,11 +160,9 @@ fn run() -> i32 {
                     state_key!(8, F9);
                     state_key!(9, F10);
                 }
-                Event::KeyReleased { code, .. } => {
-                    if let Some(key) = key_mapping(code) {
-                        ch8.release_key(key);
-                    }
-                }
+                Event::KeyReleased { code, .. } => if let Some(key) = key_mapping(code) {
+                    ch8.release_key(key);
+                },
                 Event::GainedFocus => redisplay = true,
                 _ => {}
             }
