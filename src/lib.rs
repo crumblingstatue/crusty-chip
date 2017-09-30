@@ -6,7 +6,7 @@
 //!
 
 #![feature(inclusive_range_syntax)]
-#![warn(missing_docs)]
+#![warn(missing_docs, trivial_casts, trivial_numeric_casts)]
 
 use std::{error, fmt};
 use std::num::Wrapping;
@@ -338,7 +338,7 @@ impl VirtualMachine {
             Return => ret_from_subroutine(self),
             JumpToSysRoutine { addr } => jump_to_sys_routine(self, addr as usize),
             JumpToAddress { addr } => jump_addr(self, addr),
-            CallSubroutine { addr } => call_subroutine(self, addr as usize),
+            CallSubroutine { addr } => call_subroutine(self, addr),
             SkipNextVxEq { x, cmp_with } => skip_next_vx_eq(self, x as usize, cmp_with),
             SkipNextVxNe { x, cmp_with } => skip_next_vx_ne(self, x as usize, cmp_with),
             SkipNextVxEqVy { x, y } => skip_next_vx_eq_vy(self, x as usize, y as usize),
@@ -366,8 +366,8 @@ impl VirtualMachine {
             AddVxToI { x } => add_vx_to_i(self, x as usize),
             SetIToLocOfDigitVx { x } => set_i_to_loc_of_digit_vx(self, x as usize),
             StoreBcdOfVxToI { x } => store_bcd_of_vx_to_i(self, x as usize),
-            CopyV0ThroughVxToMem { x } => copy_v0_through_vx_to_mem(self, x as usize),
-            ReadV0ThroughVxFromMem { x } => read_v0_through_vx_from_mem(self, x as usize),
+            CopyV0ThroughVxToMem { x } => copy_v0_through_vx_to_mem(self, u16::from(x)),
+            ReadV0ThroughVxFromMem { x } => read_v0_through_vx_from_mem(self, u16::from(x)),
             Unknown => panic!("Unknown instruction: {}", ins),
         }
     }

@@ -20,10 +20,10 @@ pub fn jump_addr(vm: &mut VirtualMachine, addr: u16) {
     vm.pc = addr;
 }
 
-pub fn call_subroutine(vm: &mut VirtualMachine, addr: usize) {
+pub fn call_subroutine(vm: &mut VirtualMachine, addr: u16) {
     vm.sp += 1;
     vm.stack[vm.sp as usize] = vm.pc;
-    vm.pc = addr as u16;
+    vm.pc = addr;
 }
 
 pub fn skip_next_vx_eq(vm: &mut VirtualMachine, x: usize, to: u8) {
@@ -212,18 +212,18 @@ pub fn store_bcd_of_vx_to_i(vm: &mut VirtualMachine, x: usize) {
     vm.ram[vm.i as usize + 2] = o;
 }
 
-pub fn copy_v0_through_vx_to_mem(vm: &mut VirtualMachine, x: usize) {
+pub fn copy_v0_through_vx_to_mem(vm: &mut VirtualMachine, x: u16) {
     for pos in 0..=x {
-        vm.ram[(vm.i + pos as u16) as usize] = vm.v[pos as usize].0;
+        vm.ram[(vm.i + pos) as usize] = vm.v[pos as usize].0;
     }
-    vm.i += (x + 1) as u16;
+    vm.i += x + 1;
 }
 
-pub fn read_v0_through_vx_from_mem(vm: &mut VirtualMachine, x: usize) {
+pub fn read_v0_through_vx_from_mem(vm: &mut VirtualMachine, x: u16) {
     for pos in 0..=x {
-        vm.v[pos as usize].0 = vm.ram[(vm.i + pos as u16) as usize];
+        vm.v[pos as usize].0 = vm.ram[(vm.i + pos) as usize];
     }
-    vm.i += (x + 1) as u16;
+    vm.i += x + 1;
 }
 
 #[test]
