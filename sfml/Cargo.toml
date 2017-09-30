@@ -8,5 +8,5 @@ authors = [ "radiantstatue@gmail.com" ]
 path = "../"
 
 [dependencies]
-sfml = "0.12"
+sfml = "0.13"
 getopts = "0.2.14"

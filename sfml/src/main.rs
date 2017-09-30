@@ -13,7 +13,7 @@ fn run() -> i32 {
     use crusty_chip::{decode, VirtualMachine, DISPLAY_HEIGHT, DISPLAY_WIDTH};
     use sfml::graphics::{Color, RenderTarget, RenderWindow, Sprite, Texture, Transformable};
     use sfml::system::Clock;
-    use sfml::window::{style, ContextSettings, Event, VideoMode};
+    use sfml::window::{ContextSettings, Event, Style, VideoMode};
     use std::fs::File;
     use std::io::Read;
 
@@ -83,13 +83,13 @@ fn run() -> i32 {
             32,
         ),
         "CrustyChip",
-        style::CLOSE,
+        Style::CLOSE,
         &ctx,
-    ).unwrap();
+    );
 
     let mut tex = Texture::new(DISPLAY_WIDTH as u32, DISPLAY_HEIGHT as u32).unwrap();
 
-    win.clear(&Color::black());
+    win.clear(&Color::BLACK);
     win.display();
     let mut saved_states = [None; 10];
     let mut printed_info = false;
@@ -98,7 +98,7 @@ fn run() -> i32 {
     loop {
         let mut advance = false;
         let mut redisplay = false;
-        for event in win.events() {
+        while let Some(event) = win.poll_event() {
             use sfml::window::Key;
             fn key_mapping(code: Key) -> Option<usize> {
                 match code {
@@ -213,7 +213,7 @@ fn run() -> i32 {
 
             tex.update_from_pixels(&pixels, DISPLAY_WIDTH as u32, DISPLAY_HEIGHT as u32, 0, 0);
             let mut sprite = Sprite::with_texture(&tex);
-            sprite.set_scale2f(scale as f32, scale as f32);
+            sprite.set_scale((scale as f32, scale as f32));
             win.draw(&sprite);
             win.display();
         }
