@@ -2,7 +2,7 @@
 //! You can develop your own frontends for it.
 //!
 //! The reference frontend is
-//! [crusty-chip-sfml](https://github.com/crumblingstatue/crusty-chip-sfml).
+//! [crusty-chip-sfml](https://github.com/crumblingstatue/crusty-chip/tree/master/sfml).
 //!
 
 #![feature(inclusive_range_syntax)]
