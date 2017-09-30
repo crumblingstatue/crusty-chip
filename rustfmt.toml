@@ -1,9 +1,1 @@
-write_mode = "overwrite"
 reorder_imports = true
-reorder_imported_names = true
-fn_args_layout = "Block"
-array_layout = "Block"
-control_style = "Rfc"
-where_style = "Rfc"
-generics_indent = "Block"
-fn_call_style = "Block"
