@@ -10,7 +10,6 @@
 
 use std::{error, fmt};
 use std::num::Wrapping;
-use std::ops::{Deref, DerefMut};
 
 mod ops;
 
@@ -234,27 +233,10 @@ struct KeypressWait {
     vx: usize,
 }
 
-macro_rules! array_wrap (
-    ($name:ident, $typ:ty) => (
-        #[derive(Clone, Copy)]
-        struct $name($typ);
-        impl Deref for $name {
-            type Target = $typ;
-            fn deref(&self) -> &$typ { &self.0 }
-        }
-        impl DerefMut for $name {
-            fn deref_mut(&mut self) -> &mut $typ { &mut self.0 }
-        }
-    )
-);
-
-array_wrap!(DisplayArray, [u8; DISPLAY_WIDTH * DISPLAY_HEIGHT]);
-array_wrap!(MemArray, [u8; MEM_SIZE]);
-
 /// A CHIP-8 virtual machine.
 #[derive(Clone, Copy)]
 pub struct VirtualMachine {
-    ram: MemArray,
+    ram: [u8; MEM_SIZE],
     v: [Wrapping<u8>; 16],
     i: u16,
     delay_timer: u8,
@@ -262,7 +244,7 @@ pub struct VirtualMachine {
     pc: u16,
     sp: u8,
     stack: [u16; 16],
-    display: DisplayArray,
+    display: [u8; DISPLAY_WIDTH * DISPLAY_HEIGHT],
     display_updated: bool,
     keys: [bool; 16],
     keypress_wait: KeypressWait,
@@ -306,7 +288,7 @@ impl VirtualMachine {
     /// Constructs a new VirtualMachine.
     pub fn new() -> VirtualMachine {
         let mut ch8 = VirtualMachine {
-            ram: MemArray([0; MEM_SIZE]),
+            ram: [0; MEM_SIZE],
             v: [Wrapping(0); 16],
             i: 0,
             delay_timer: 0,
@@ -314,7 +296,7 @@ impl VirtualMachine {
             pc: START_ADDR,
             sp: 0,
             stack: [0; 16],
-            display: DisplayArray([0; DISPLAY_WIDTH * DISPLAY_HEIGHT]),
+            display: [0; DISPLAY_WIDTH * DISPLAY_HEIGHT],
             display_updated: false,
             keys: [false; 16],
             keypress_wait: KeypressWait { wait: false, vx: 0 },
@@ -446,6 +428,6 @@ impl VirtualMachine {
     }
     /// Returns the contents of the display.
     pub fn display(&self) -> &[u8; DISPLAY_WIDTH * DISPLAY_HEIGHT] {
-        &*self.display
+        &self.display
     }
 }
