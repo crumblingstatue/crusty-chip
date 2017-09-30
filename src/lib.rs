@@ -236,11 +236,8 @@ struct KeypressWait {
 
 macro_rules! array_wrap (
     ($name:ident, $typ:ty) => (
-        #[derive(Copy)]
+        #[derive(Clone, Copy)]
         struct $name($typ);
-        impl Clone for $name {
-            fn clone(&self) -> $name { *self }
-        }
         impl Deref for $name {
             type Target = $typ;
             fn deref(&self) -> &$typ { &self.0 }
@@ -397,7 +394,7 @@ impl VirtualMachine {
     pub fn get_ins(&self) -> u16 {
         let b1 = self.ram[self.pc as usize];
         let b2 = self.ram[(self.pc + 1) as usize];
-        (b1 as u16) << 8 | b2 as u16
+        u16::from(b1) << 8 | u16::from(b2)
     }
 
     /// Returns the value of the program counter.

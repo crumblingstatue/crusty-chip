@@ -69,7 +69,7 @@ pub fn set_vx_to_vx_xor_vy(vm: &mut VirtualMachine, x: usize, y: usize) {
 }
 
 pub fn add_vx_vy(vm: &mut VirtualMachine, x: usize, y: usize) {
-    vm.v[0xF].0 = if vm.v[x].0 as u16 + vm.v[y].0 as u16 > 255 {
+    vm.v[0xF].0 = if u16::from(vm.v[x].0) + u16::from(vm.v[y].0) > 255 {
         1
     } else {
         0
@@ -152,7 +152,7 @@ pub fn display_sprite(vm: &mut VirtualMachine, vx: usize, vy: usize, n: usize) {
 
             if xx < DISPLAY_WIDTH && yy < DISPLAY_HEIGHT {
                 let idx = yy * DISPLAY_WIDTH + xx;
-                if b & (0b10000000 >> x) != 0 {
+                if b & (0b1000_0000 >> x) != 0 {
                     if vm.display[idx] == 1 {
                         vm.v[0xF].0 = 1;
                     }
@@ -195,11 +195,11 @@ pub fn set_sound_timer(vm: &mut VirtualMachine, x: usize) {
 }
 
 pub fn add_vx_to_i(vm: &mut VirtualMachine, x: usize) {
-    vm.i += vm.v[x].0 as u16;
+    vm.i += u16::from(vm.v[x].0);
 }
 
 pub fn set_i_to_loc_of_digit_vx(vm: &mut VirtualMachine, x: usize) {
-    vm.i = (vm.v[x] * Wrapping(5)).0 as u16;
+    vm.i = u16::from((vm.v[x] * Wrapping(5)).0);
 }
 
 pub fn store_bcd_of_vx_to_i(vm: &mut VirtualMachine, x: usize) {
