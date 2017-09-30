@@ -213,14 +213,14 @@ pub fn store_bcd_of_vx_to_i(vm: &mut VirtualMachine, x: usize) {
 }
 
 pub fn copy_v0_through_vx_to_mem(vm: &mut VirtualMachine, x: usize) {
-    for pos in 0...x {
+    for pos in 0..=x {
         vm.ram[(vm.i + pos as u16) as usize] = vm.v[pos as usize].0;
     }
     vm.i += (x + 1) as u16;
 }
 
 pub fn read_v0_through_vx_from_mem(vm: &mut VirtualMachine, x: usize) {
-    for pos in 0...x {
+    for pos in 0..=x {
         vm.v[pos as usize].0 = vm.ram[(vm.i + pos as u16) as usize];
     }
     vm.i += (x + 1) as u16;
