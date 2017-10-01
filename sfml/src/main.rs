@@ -60,7 +60,6 @@ fn run() -> i32 {
     }
 
     let mut data = Vec::new();
-    // TODO: Dunno if this always reads the whole file
     file.read_to_end(&mut data)
         .unwrap_or_else(|e| panic!("Failed to read rom: {}", e));
 
