@@ -1,1 +1,2 @@
 reorder_imports = true
+array_horizontal_layout_threshold = 32
