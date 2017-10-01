@@ -329,11 +329,11 @@ impl VirtualMachine {
     /// Presses a key on the hexadecimal keypad.
     ///
     /// `key` should be in the range `0..15`.
-    pub fn press_key(&mut self, key: usize) {
+    pub fn press_key(&mut self, key: u8) {
         assert!(key <= 15);
-        self.keys[key] = true;
+        self.keys[usize::from(key)] = true;
         if self.keypress_wait.wait {
-            self.v[self.keypress_wait.vx].0 = key as u8;
+            self.v[self.keypress_wait.vx].0 = key;
             self.keypress_wait.wait = false;
         }
     }
@@ -341,9 +341,9 @@ impl VirtualMachine {
     /// Releases a key on the hexadecimal keypad.
     ///
     /// `key` should be in the range `0..15`.
-    pub fn release_key(&mut self, key: usize) {
+    pub fn release_key(&mut self, key: u8) {
         assert!(key <= 15);
-        self.keys[key] = false;
+        self.keys[usize::from(key)] = false;
     }
 
     /// Decrements the sound and delay timers.

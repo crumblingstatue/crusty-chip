@@ -100,7 +100,7 @@ fn run() -> i32 {
         let mut redisplay = false;
         while let Some(event) = win.poll_event() {
             use sfml::window::Key;
-            fn key_mapping(code: Key) -> Option<usize> {
+            fn key_mapping(code: Key) -> Option<u8> {
                 match code {
                     Key::Num1 => Some(1),
                     Key::Num2 => Some(2),
