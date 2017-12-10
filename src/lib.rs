@@ -201,8 +201,7 @@ impl fmt::Display for RomLoadError {
             RomLoadError::TooBig(size) => write!(
                 f,
                 "Rom size ({}) is too big. The maximum valid rom size is {}.",
-                size,
-                MAX_ROM_LEN
+                size, MAX_ROM_LEN
             ),
         }
     }
