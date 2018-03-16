@@ -5,7 +5,6 @@
 //! [crusty-chip-sfml](https://github.com/crumblingstatue/crusty-chip/tree/master/sfml).
 //!
 
-#![feature(inclusive_range_syntax)]
 #![warn(missing_docs, trivial_casts, trivial_numeric_casts)]
 
 use std::{error, fmt};
