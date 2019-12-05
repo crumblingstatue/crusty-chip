@@ -5,8 +5,8 @@ version = "0.1.0"
 authors = [ "radiantstatue@gmail.com" ]
 
 [dependencies]
-rand = "0.3.14"
-bit_utils = "0.1.0"
+rand = "0.7.2"
+bit_utils = "0.1.1"
 
 [workspace]
 members = ["sfml"]

@@ -88,7 +88,7 @@ fn run() -> i32 {
 
     let mut tex = Texture::new(DISPLAY_WIDTH as u32, DISPLAY_HEIGHT as u32).unwrap();
 
-    win.clear(&Color::BLACK);
+    win.clear(Color::BLACK);
     win.display();
     let mut saved_states = [None; 10];
     let mut printed_info = false;
@@ -210,7 +210,9 @@ fn run() -> i32 {
                 }
             }
 
-            tex.update_from_pixels(&pixels, DISPLAY_WIDTH as u32, DISPLAY_HEIGHT as u32, 0, 0);
+            unsafe {
+                tex.update_from_pixels(&pixels, DISPLAY_WIDTH as u32, DISPLAY_HEIGHT as u32, 0, 0);
+            }
             let mut sprite = Sprite::with_texture(&tex);
             sprite.set_scale((scale as f32, scale as f32));
             win.draw(&sprite);
