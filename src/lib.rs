@@ -7,8 +7,8 @@
 
 #![warn(missing_docs, trivial_casts, trivial_numeric_casts)]
 
-use std::{error, fmt};
 use std::num::Wrapping;
+use std::{error, fmt};
 
 mod ops;
 
@@ -265,8 +265,8 @@ impl VirtualMachine {
 
     // Decode instruction and execute it
     fn dispatch(&mut self, ins: u16) {
-        use Instruction::*;
         use ops::*;
+        use Instruction::*;
         match decode(ins) {
             ClearDisplay => clear_display(self),
             Return => ret_from_subroutine(self),

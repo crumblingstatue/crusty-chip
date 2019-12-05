@@ -159,9 +159,11 @@ fn run() -> i32 {
                     state_key!(8, F9);
                     state_key!(9, F10);
                 }
-                Event::KeyReleased { code, .. } => if let Some(key) = key_mapping(code) {
-                    ch8.release_key(key);
-                },
+                Event::KeyReleased { code, .. } => {
+                    if let Some(key) = key_mapping(code) {
+                        ch8.release_key(key);
+                    }
+                }
                 Event::GainedFocus => redisplay = true,
                 _ => {}
             }
