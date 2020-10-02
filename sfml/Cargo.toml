@@ -9,5 +9,5 @@ edition = "2018"
 path = "../"
 
 [dependencies]
-sfml = "0.15.1"
+sfml = { git = "https://github.com/jeremyletang/rust-sfml.git" }
 getopts = "0.2.21"

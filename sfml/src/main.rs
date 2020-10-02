@@ -97,10 +97,10 @@ fn run() -> i32 {
             use sfml::window::Key;
             fn key_mapping(code: Key) -> Option<u8> {
                 match code {
-                    Key::Num1 => Some(1),
-                    Key::Num2 => Some(2),
-                    Key::Num3 => Some(3),
-                    Key::Num4 => Some(0xC),
+                    Key::NUM1 => Some(1),
+                    Key::NUM2 => Some(2),
+                    Key::NUM3 => Some(3),
+                    Key::NUM4 => Some(0xC),
                     Key::Q => Some(4),
                     Key::W => Some(5),
                     Key::E => Some(6),
@@ -126,7 +126,7 @@ fn run() -> i32 {
                     } else if code == Key::R && ctrl {
                         ch8 = VirtualMachine::new();
                         ch8.load_rom(&data).expect("ROM data too big? It changed?");
-                    } else if code == Key::Period {
+                    } else if code == Key::PERIOD {
                         advance = true;
                     } else if let Some(key) = key_mapping(code) {
                         ch8.press_key(key);
