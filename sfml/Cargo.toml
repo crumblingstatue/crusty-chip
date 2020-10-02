@@ -11,7 +11,3 @@ path = "../"
 [dependencies]
 sfml = { git = "https://github.com/jeremyletang/rust-sfml.git" }
 getopts = "0.2.21"
-
-[profile.release]
-panic = "abort"
-codegen-units = 1

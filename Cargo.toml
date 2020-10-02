@@ -11,3 +11,7 @@ bit_utils = "0.1.1"
 
 [workspace]
 members = ["sfml"]
+
+[profile.release]
+panic = "abort"
+codegen-units = 1

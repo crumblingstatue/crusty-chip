@@ -7,7 +7,7 @@ fn usage(progname: &str, opts: &Options) -> String {
 
 fn run() -> i32 {
     use crusty_chip::{decode, VirtualMachine, DISPLAY_HEIGHT, DISPLAY_WIDTH};
-    use sfml::graphics::{Color, RenderTarget, RenderWindow, Sprite, Texture, Transformable};
+    use sfml::graphics::{RenderTarget, RenderWindow, Sprite, Texture, Transformable};
     use sfml::system::Clock;
     use sfml::window::{ContextSettings, Event, Style, VideoMode};
     use std::fs::File;
@@ -81,18 +81,15 @@ fn run() -> i32 {
         Style::CLOSE,
         &ctx,
     );
+    win.set_vertical_sync_enabled(true);
 
     let mut tex = Texture::new(DISPLAY_WIDTH as u32, DISPLAY_HEIGHT as u32).unwrap();
-
-    win.clear(Color::BLACK);
-    win.display();
     let mut saved_states = [None; 10];
     let mut printed_info = false;
     let mut cycles_made: u64 = 0;
 
     loop {
         let mut advance = false;
-        let mut redisplay = false;
         while let Some(event) = win.poll_event() {
             use sfml::window::Key;
             fn key_mapping(code: Key) -> Option<u8> {
@@ -160,13 +157,8 @@ fn run() -> i32 {
                         ch8.release_key(key);
                     }
                 }
-                Event::GainedFocus => redisplay = true,
                 _ => {}
             }
-        }
-
-        if redisplay {
-            win.display();
         }
 
         if clock.elapsed_time().as_seconds() >= 1.0 / 60.0 {
@@ -181,7 +173,7 @@ fn run() -> i32 {
         if paused && !printed_info {
             let raw_ins = ch8.get_ins();
             println!(
-                "Cycle {}, pc @ {:x}, ins: {:?} ({:x})",
+                "Cycle {}, pc @ {:#x}, ins: {:#x?} raw: {:#x}",
                 cycles_made,
                 ch8.pc(),
                 decode(raw_ins),
@@ -211,11 +203,11 @@ fn run() -> i32 {
             unsafe {
                 tex.update_from_pixels(&pixels, DISPLAY_WIDTH as u32, DISPLAY_HEIGHT as u32, 0, 0);
             }
-            let mut sprite = Sprite::with_texture(&tex);
-            sprite.set_scale((scale as f32, scale as f32));
-            win.draw(&sprite);
-            win.display();
         }
+        let mut sprite = Sprite::with_texture(&tex);
+        sprite.set_scale((scale as f32, scale as f32));
+        win.draw(&sprite);
+        win.display();
     }
 }
 
