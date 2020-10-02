@@ -1,7 +1,3 @@
-extern crate crusty_chip;
-extern crate getopts;
-extern crate sfml;
-
 use getopts::Options;
 
 fn usage(progname: &str, opts: &Options) -> String {

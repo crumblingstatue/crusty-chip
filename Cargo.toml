@@ -3,9 +3,10 @@
 name = "crusty_chip"
 version = "0.1.0"
 authors = [ "radiantstatue@gmail.com" ]
+edition = "2018"
 
 [dependencies]
-rand = "0.7.2"
+rand = "0.7.3"
 bit_utils = "0.1.1"
 
 [workspace]

@@ -12,8 +12,6 @@ use std::{error, fmt};
 
 mod ops;
 
-extern crate bit_utils;
-
 /// 4 bit value extracted from an instruction.
 pub type Nibble = u8;
 /// 8 bit value extracted from an instruction.

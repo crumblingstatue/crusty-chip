@@ -131,10 +131,8 @@ pub fn set_i(vm: &mut VirtualMachine, to: u16) {
     vm.i = to;
 }
 
-extern crate rand;
-
 pub fn set_vx_rand_and(vm: &mut VirtualMachine, x: usize, to: u8) {
-    use self::rand::Rng;
+    use rand::Rng;
     let mut rgen = rand::thread_rng();
     vm.v[x].0 = rgen.gen::<u8>() & to;
 }
