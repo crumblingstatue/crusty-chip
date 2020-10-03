@@ -183,25 +183,29 @@ fn run() -> i32 {
             printed_info = false;
         }
 
-        let mut pixels = [255u8; DISPLAY_WIDTH * DISPLAY_HEIGHT * 4];
+        render_screen(&mut win, &mut tex, &ch8, scale as f32);
+    }
+}
 
-        for (i, b) in ch8.display().iter().enumerate() {
-            let idx = i * 4;
-            if *b == 0u8 {
-                for p in pixels[idx..idx + 3].iter_mut() {
-                    *p = 0;
-                }
+fn render_screen(win: &mut RenderWindow, tex: &mut Texture, ch8: &VirtualMachine, scale: f32) {
+    let mut pixels = [255u8; DISPLAY_WIDTH * DISPLAY_HEIGHT * 4];
+
+    for (i, b) in ch8.display().iter().enumerate() {
+        let idx = i * 4;
+        if *b == 0u8 {
+            for p in pixels[idx..idx + 3].iter_mut() {
+                *p = 0;
             }
         }
-
-        unsafe {
-            tex.update_from_pixels(&pixels, DISPLAY_WIDTH as u32, DISPLAY_HEIGHT as u32, 0, 0);
-        }
-        let mut sprite = Sprite::with_texture(&tex);
-        sprite.set_scale((scale as f32, scale as f32));
-        win.draw(&sprite);
-        win.display();
     }
+
+    unsafe {
+        tex.update_from_pixels(&pixels, DISPLAY_WIDTH as u32, DISPLAY_HEIGHT as u32, 0, 0);
+    }
+    let mut sprite = Sprite::with_texture(&tex);
+    sprite.set_scale((scale, scale));
+    win.draw(&sprite);
+    win.display();
 }
 
 fn main() {
