@@ -187,21 +187,19 @@ fn run() -> i32 {
             printed_info = false;
         }
 
-        if ch8.display_updated() {
-            let mut pixels = [255u8; DISPLAY_WIDTH * DISPLAY_HEIGHT * 4];
+        let mut pixels = [255u8; DISPLAY_WIDTH * DISPLAY_HEIGHT * 4];
 
-            for (i, b) in ch8.display().iter().enumerate() {
-                let idx = i * 4;
-                if *b == 0u8 {
-                    for p in pixels[idx..idx + 3].iter_mut() {
-                        *p = 0;
-                    }
+        for (i, b) in ch8.display().iter().enumerate() {
+            let idx = i * 4;
+            if *b == 0u8 {
+                for p in pixels[idx..idx + 3].iter_mut() {
+                    *p = 0;
                 }
             }
+        }
 
-            unsafe {
-                tex.update_from_pixels(&pixels, DISPLAY_WIDTH as u32, DISPLAY_HEIGHT as u32, 0, 0);
-            }
+        unsafe {
+            tex.update_from_pixels(&pixels, DISPLAY_WIDTH as u32, DISPLAY_HEIGHT as u32, 0, 0);
         }
         let mut sprite = Sprite::with_texture(&tex);
         sprite.set_scale((scale as f32, scale as f32));
