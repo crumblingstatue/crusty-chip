@@ -1,4 +1,10 @@
+use crusty_chip::{decode, VirtualMachine, DISPLAY_HEIGHT, DISPLAY_WIDTH};
 use getopts::Options;
+use sfml::graphics::{RenderTarget, RenderWindow, Sprite, Texture, Transformable};
+use sfml::system::Clock;
+use sfml::window::{ContextSettings, Event, Style, VideoMode};
+use std::fs::File;
+use std::io::Read;
 
 fn usage(progname: &str, opts: &Options) -> String {
     let brief = format!("{} rom_file", progname);
@@ -6,13 +12,6 @@ fn usage(progname: &str, opts: &Options) -> String {
 }
 
 fn run() -> i32 {
-    use crusty_chip::{decode, VirtualMachine, DISPLAY_HEIGHT, DISPLAY_WIDTH};
-    use sfml::graphics::{RenderTarget, RenderWindow, Sprite, Texture, Transformable};
-    use sfml::system::Clock;
-    use sfml::window::{ContextSettings, Event, Style, VideoMode};
-    use std::fs::File;
-    use std::io::Read;
-
     let mut args = std::env::args();
     let progname = args.next().expect("Missing program name?");
     let mut opts = Options::new();
