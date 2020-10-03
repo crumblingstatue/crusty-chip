@@ -2,9 +2,31 @@ use crusty_chip::{decode, VirtualMachine, DISPLAY_HEIGHT, DISPLAY_WIDTH};
 use getopts::Options;
 use sfml::graphics::{RenderTarget, RenderWindow, Sprite, Texture, Transformable};
 use sfml::system::Clock;
-use sfml::window::{ContextSettings, Event, Style, VideoMode};
+use sfml::window::{ContextSettings, Event, Key, Style, VideoMode};
 use std::fs::File;
 use std::io::Read;
+
+fn sfml_key_to_ch8(code: Key) -> Option<u8> {
+    Some(match code {
+        Key::NUM1 => 1,
+        Key::NUM2 => 2,
+        Key::NUM3 => 3,
+        Key::NUM4 => 0xC,
+        Key::Q => 4,
+        Key::W => 5,
+        Key::E => 6,
+        Key::R => 0xD,
+        Key::A => 7,
+        Key::S => 8,
+        Key::D => 9,
+        Key::F => 0xE,
+        Key::Z => 0xA,
+        Key::X => 0,
+        Key::C => 0xB,
+        Key::V => 0xF,
+        _ => return None,
+    })
+}
 
 fn usage(progname: &str, opts: &Options) -> String {
     let brief = format!("{} rom_file", progname);
@@ -90,28 +112,6 @@ fn run() -> i32 {
     loop {
         let mut advance = false;
         while let Some(event) = win.poll_event() {
-            use sfml::window::Key;
-            fn key_mapping(code: Key) -> Option<u8> {
-                match code {
-                    Key::NUM1 => Some(1),
-                    Key::NUM2 => Some(2),
-                    Key::NUM3 => Some(3),
-                    Key::NUM4 => Some(0xC),
-                    Key::Q => Some(4),
-                    Key::W => Some(5),
-                    Key::E => Some(6),
-                    Key::R => Some(0xD),
-                    Key::A => Some(7),
-                    Key::S => Some(8),
-                    Key::D => Some(9),
-                    Key::F => Some(0xE),
-                    Key::Z => Some(0xA),
-                    Key::X => Some(0),
-                    Key::C => Some(0xB),
-                    Key::V => Some(0xF),
-                    _ => None,
-                }
-            }
             match event {
                 Event::Closed => return 0,
                 Event::KeyPressed {
@@ -124,7 +124,7 @@ fn run() -> i32 {
                         ch8.load_rom(&data).expect("ROM data too big? It changed?");
                     } else if code == Key::PERIOD {
                         advance = true;
-                    } else if let Some(key) = key_mapping(code) {
+                    } else if let Some(key) = sfml_key_to_ch8(code) {
                         ch8.press_key(key);
                     }
                     macro_rules! state_key (
@@ -152,7 +152,7 @@ fn run() -> i32 {
                     state_key!(9, F10);
                 }
                 Event::KeyReleased { code, .. } => {
-                    if let Some(key) = key_mapping(code) {
+                    if let Some(key) = sfml_key_to_ch8(code) {
                         ch8.release_key(key);
                     }
                 }
