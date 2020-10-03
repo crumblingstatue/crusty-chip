@@ -165,10 +165,6 @@ fn run() -> i32 {
             clock.restart();
         }
 
-        if paused {
-            std::thread::sleep(std::time::Duration::from_millis(25));
-        }
-
         if paused && !printed_info {
             let raw_ins = ch8.get_ins();
             println!(
