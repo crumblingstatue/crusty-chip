@@ -159,15 +159,25 @@ fn run() -> i32 {
                 _ => {}
             }
         }
-        do_emulation_cycle(
-            &mut clock,
-            &mut ch8,
-            paused,
-            &mut printed_info,
-            &mut cycles_made,
-            advance,
-        );
+        let mut cycles = 0;
+        while !(ch8.display_updated() || ch8.waiting_for_key()) {
+            do_emulation_cycle(
+                &mut clock,
+                &mut ch8,
+                paused,
+                &mut printed_info,
+                &mut cycles_made,
+                advance,
+            );
+            cycles += 1;
+            // Take a little break and render if the machine takes too long
+            // to respond
+            if cycles > 50_000 {
+                break;
+            }
+        }
         render_screen(&mut win, &mut tex, &ch8, scale as f32);
+        ch8.clear_du_flag();
     }
 }
 

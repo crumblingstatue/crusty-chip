@@ -252,11 +252,6 @@ impl VirtualMachine {
 
     /// Does an interpretation cycle.
     pub fn do_cycle(&mut self) {
-        self.display_updated = false;
-        if self.keypress_wait.wait {
-            return;
-        }
-
         let ins = self.fetch_ins();
         self.dispatch(ins);
     }
@@ -360,5 +355,13 @@ impl VirtualMachine {
     /// Returns the contents of the display.
     pub fn display(&self) -> &[u8; DISPLAY_WIDTH * DISPLAY_HEIGHT] {
         &self.display
+    }
+    /// Whether the VM is waiting for a key
+    pub fn waiting_for_key(&self) -> bool {
+        self.keypress_wait.wait
+    }
+    /// Clear the display updated flag. Use this after you rendered the display.
+    pub fn clear_du_flag(&mut self) {
+        self.display_updated = false;
     }
 }
