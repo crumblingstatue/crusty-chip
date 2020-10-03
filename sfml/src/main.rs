@@ -159,31 +159,47 @@ fn run() -> i32 {
                 _ => {}
             }
         }
-
-        if clock.elapsed_time().as_seconds() >= 1.0 / 60.0 {
-            ch8.decrement_timers();
-            clock.restart();
-        }
-
-        if paused && !printed_info {
-            let raw_ins = ch8.get_ins();
-            println!(
-                "Cycle {}, pc @ {:#x}, ins: {:#x?} raw: {:#x}",
-                cycles_made,
-                ch8.pc(),
-                decode(raw_ins),
-                raw_ins
-            );
-            printed_info = true;
-        }
-
-        if !paused || advance {
-            ch8.do_cycle();
-            cycles_made += 1;
-            printed_info = false;
-        }
-
+        do_emulation_cycle(
+            &mut clock,
+            &mut ch8,
+            paused,
+            &mut printed_info,
+            &mut cycles_made,
+            advance,
+        );
         render_screen(&mut win, &mut tex, &ch8, scale as f32);
+    }
+}
+
+fn do_emulation_cycle(
+    clock: &mut Clock,
+    ch8: &mut VirtualMachine,
+    paused: bool,
+    printed_info: &mut bool,
+    cycles_made: &mut u64,
+    advance: bool,
+) {
+    if clock.elapsed_time().as_seconds() >= 1.0 / 60.0 {
+        ch8.decrement_timers();
+        clock.restart();
+    }
+
+    if paused && !*printed_info {
+        let raw_ins = ch8.get_ins();
+        println!(
+            "Cycle {}, pc @ {:#x}, ins: {:#x?} raw: {:#x}",
+            cycles_made,
+            ch8.pc(),
+            decode(raw_ins),
+            raw_ins
+        );
+        *printed_info = true;
+    }
+
+    if !paused || advance {
+        ch8.do_cycle();
+        *cycles_made += 1;
+        *printed_info = false;
     }
 }
 
