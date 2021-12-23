@@ -8,10 +8,10 @@ use std::io::Read;
 
 fn sfml_key_to_ch8(code: Key) -> Option<u8> {
     Some(match code {
-        Key::NUM1 => 1,
-        Key::NUM2 => 2,
-        Key::NUM3 => 3,
-        Key::NUM4 => 0xC,
+        Key::Num1 => 1,
+        Key::Num2 => 2,
+        Key::Num3 => 3,
+        Key::Num4 => 0xC,
         Key::Q => 4,
         Key::W => 5,
         Key::E => 6,
@@ -104,7 +104,10 @@ fn run() -> i32 {
     );
     win.set_vertical_sync_enabled(true);
 
-    let mut tex = Texture::new(DISPLAY_WIDTH as u32, DISPLAY_HEIGHT as u32).unwrap();
+    let mut tex = Texture::new().unwrap();
+    if !tex.create(DISPLAY_WIDTH as u32, DISPLAY_HEIGHT as u32) {
+        panic!("Couldn't create texture");
+    }
     let mut saved_states = [None; 10];
     let mut printed_info = false;
     let mut cycles_made: u64 = 0;
@@ -122,7 +125,7 @@ fn run() -> i32 {
                     } else if code == Key::R && ctrl {
                         ch8 = VirtualMachine::new();
                         ch8.load_rom(&data).expect("ROM data too big? It changed?");
-                    } else if code == Key::PERIOD {
+                    } else if code == Key::Period {
                         advance = true;
                     } else if let Some(key) = sfml_key_to_ch8(code) {
                         ch8.press_key(key);
@@ -228,7 +231,7 @@ fn render_screen(win: &mut RenderWindow, tex: &mut Texture, ch8: &VirtualMachine
     unsafe {
         tex.update_from_pixels(&pixels, DISPLAY_WIDTH as u32, DISPLAY_HEIGHT as u32, 0, 0);
     }
-    let mut sprite = Sprite::with_texture(&tex);
+    let mut sprite = Sprite::with_texture(tex);
     sprite.set_scale((scale, scale));
     win.draw(&sprite);
     win.display();
