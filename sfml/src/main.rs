@@ -60,7 +60,7 @@ fn run() -> i32 {
 
     let mut clock = Clock::start();
 
-    let mut file = match File::open(&filename) {
+    let file = match File::open(&filename) {
         Ok(f) => f,
         Err(e) => {
             eprintln!("Failed to open \"{}\": {}", filename, e);
@@ -69,7 +69,8 @@ fn run() -> i32 {
     };
 
     let mut data = Vec::new();
-    file.read_to_end(&mut data)
+    file.take(crusty_chip::MEM_SIZE as u64)
+        .read_to_end(&mut data)
         .unwrap_or_else(|e| panic!("Failed to read rom: {}", e));
 
     let scale = 10;
