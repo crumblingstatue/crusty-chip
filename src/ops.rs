@@ -1,5 +1,6 @@
 use super::VirtualMachine;
 use std::num::Wrapping;
+use std::fmt::Write;
 
 impl VirtualMachine {
     pub(super) fn jump_to_sys_routine(&mut self, _addr: usize) {
@@ -26,7 +27,7 @@ impl VirtualMachine {
         match self.stack.get_mut(self.sp.0 as usize) {
             Some(mem) => *mem = self.pc,
             None => {
-                eprintln!("Stack out of bounds. Ignoring write.");
+                writeln!(self.log, "Stack out of bounds. Ignoring write.").unwrap();
             }
         };
         self.pc = addr;

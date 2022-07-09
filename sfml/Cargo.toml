@@ -10,4 +10,5 @@ path = "../"
 
 [dependencies]
 sfml = { git = "https://github.com/jeremyletang/rust-sfml.git" }
+egui-sfml = { git = "https://github.com/crumblingstatue/egui-sfml.git", version = "0.1.0" }
 getopts = "0.2.21"

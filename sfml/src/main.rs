@@ -1,4 +1,5 @@
 use crusty_chip::{decode, VirtualMachine, DISPLAY_HEIGHT, DISPLAY_WIDTH};
+use egui_sfml::egui;
 use getopts::Options;
 use sfml::graphics::{RenderTarget, RenderWindow, Sprite, Texture, Transformable};
 use sfml::system::Clock;
@@ -58,6 +59,8 @@ fn run() -> i32 {
         }
     };
 
+    let mut log_open = false;
+
     let mut clock = Clock::start();
 
     let file = match File::open(&filename) {
@@ -91,17 +94,20 @@ fn run() -> i32 {
     );
     win.set_vertical_sync_enabled(true);
 
+    let mut sf_egui = egui_sfml::SfEgui::new(&win);
+
     let mut tex = Texture::new().unwrap();
     if !tex.create(DISPLAY_WIDTH as u32, DISPLAY_HEIGHT as u32) {
         panic!("Couldn't create texture");
     }
-    let mut saved_states = [None; 10];
+    let mut saved_states: [Option<VirtualMachine>; 10] = std::array::from_fn(|_idx| None);
     let mut printed_info = false;
     let mut cycles_made: u64 = 0;
 
     loop {
         let mut advance = false;
         while let Some(event) = win.poll_event() {
+            sf_egui.add_event(&event);
             match event {
                 Event::Closed => return 0,
                 Event::KeyPressed {
@@ -114,6 +120,8 @@ fn run() -> i32 {
                         ch8.load_rom(&data);
                     } else if code == Key::Period {
                         advance = true;
+                    } else if code == Key::F11 {
+                        log_open ^= true;
                     } else if let Some(key) = sfml_key_to_ch8(code) {
                         ch8.press_key(key);
                     }
@@ -121,9 +129,9 @@ fn run() -> i32 {
                         ($s: expr, $k: ident) => (
                             if code == Key::$k {
                                 if shift {
-                                    saved_states[$s] = Some(ch8);
+                                    saved_states[$s] = Some(ch8.clone());
                                     eprintln!("Saved state {}.", $s);
-                                } else if let Some(state) = saved_states[$s] {
+                                } else if let Some(state) = saved_states[$s].clone() {
                                     ch8 = state;
                                     eprintln!("Loaded state {}.", $s);
                                 }
@@ -166,8 +174,26 @@ fn run() -> i32 {
                 break;
             }
         }
+        sf_egui.do_frame(|ctx| {
+            egui::Window::new("Log (F11)")
+                .open(&mut log_open)
+                .show(ctx, |ui| {
+                    egui::ScrollArea::vertical()
+                        .stick_to_bottom()
+                        .max_height(200.)
+                        .show(ui, |ui| {
+                            let log_size = 5000;
+                            if ch8.log.len() > log_size {
+                                ch8.log = ch8.log[ch8.log.len() - log_size..].to_owned();
+                            }
+                            ui.label(&ch8.log);
+                        });
+                });
+        });
         render_screen(&mut win, &mut tex, &ch8, scale as f32);
         ch8.clear_du_flag();
+        sf_egui.draw(&mut win, None);
+        win.display();
     }
 }
 
@@ -221,7 +247,6 @@ fn render_screen(win: &mut RenderWindow, tex: &mut Texture, ch8: &VirtualMachine
     let mut sprite = Sprite::with_texture(tex);
     sprite.set_scale((scale, scale));
     win.draw(&sprite);
-    win.display();
 }
 
 fn main() {

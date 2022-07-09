@@ -8,6 +8,7 @@
 #![warn(missing_docs, trivial_casts, trivial_numeric_casts)]
 
 use std::num::Wrapping;
+use std::fmt::Write;
 
 mod ops;
 
@@ -166,7 +167,7 @@ struct KeypressWait {
 }
 
 /// A CHIP-8 virtual machine.
-#[derive(Clone, Copy)]
+#[derive(Clone)]
 pub struct VirtualMachine {
     ram: [u8; MEM_SIZE],
     v: [Wrapping<u8>; 16],
@@ -181,6 +182,8 @@ pub struct VirtualMachine {
     keys: [bool; 16],
     keypress_wait: KeypressWait,
     halt: bool,
+    /// Message log
+    pub log: String,
 }
 
 impl Default for VirtualMachine {
@@ -206,6 +209,7 @@ impl VirtualMachine {
             keys: [false; 16],
             keypress_wait: KeypressWait { wait: false, vx: 0 },
             halt: false,
+            log: String::new(),
         };
         ch8.ram[0usize..5 * 0x10].copy_from_slice(&FONTSET);
         ch8
@@ -267,14 +271,14 @@ impl VirtualMachine {
             StoreBcdOfVxToI { x } => self.store_bcd_of_vx_to_i(x as usize),
             CopyV0ThroughVxToMem { x } => self.copy_v0_through_vx_to_mem(u16::from(x)),
             ReadV0ThroughVxFromMem { x } => self.read_v0_through_vx_from_mem(u16::from(x)),
-            Unknown => eprintln!("Unknown instruction: {:X}", ins),
+            Unknown => writeln!(self.log, "Unknown instruction: {:X}", ins).unwrap(),
         }
     }
 
     /// Gets the instruction that the program counter is pointing to.
     pub fn get_ins(&mut self) -> u16 {
         let b1 = self.ram.get(self.pc as usize).cloned().unwrap_or_else(|| {
-            eprintln!("Out of bounds when getting instruction. Halted.");
+            writeln!(self.log, "Out of bounds when getting instruction. Halted.").unwrap();
             self.halt = true;
             0
         });
@@ -283,7 +287,7 @@ impl VirtualMachine {
             .get((self.pc + 1) as usize)
             .cloned()
             .unwrap_or_else(|| {
-                eprintln!("Out of bounds when getting instruction. Halted.");
+                writeln!(self.log, "Out of bounds when getting instruction. Halted.").unwrap();
                 self.halt = true;
                 0
             });
