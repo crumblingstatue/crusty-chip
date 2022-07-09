@@ -263,7 +263,7 @@ impl VirtualMachine {
             StoreBcdOfVxToI { x } => self.store_bcd_of_vx_to_i(x as usize),
             CopyV0ThroughVxToMem { x } => self.copy_v0_through_vx_to_mem(u16::from(x)),
             ReadV0ThroughVxFromMem { x } => self.read_v0_through_vx_from_mem(u16::from(x)),
-            Unknown => panic!("Unknown instruction: {}", ins),
+            Unknown => eprintln!("Unknown instruction: {}", ins),
         }
     }
 
