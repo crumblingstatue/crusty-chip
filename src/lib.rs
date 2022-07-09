@@ -180,6 +180,7 @@ pub struct VirtualMachine {
     display_updated: bool,
     keys: [bool; 16],
     keypress_wait: KeypressWait,
+    halt: bool,
 }
 
 impl Default for VirtualMachine {
@@ -204,6 +205,7 @@ impl VirtualMachine {
             display_updated: false,
             keys: [false; 16],
             keypress_wait: KeypressWait { wait: false, vx: 0 },
+            halt: false,
         };
         ch8.ram[0usize..5 * 0x10].copy_from_slice(&FONTSET);
         ch8
@@ -221,8 +223,10 @@ impl VirtualMachine {
 
     /// Does an interpretation cycle.
     pub fn do_cycle(&mut self) {
-        let ins = self.fetch_ins();
-        self.dispatch(ins);
+        if !self.halt {
+            let ins = self.fetch_ins();
+            self.dispatch(ins);
+        }
     }
 
     // Decode instruction and execute it
@@ -268,9 +272,21 @@ impl VirtualMachine {
     }
 
     /// Gets the instruction that the program counter is pointing to.
-    pub fn get_ins(&self) -> u16 {
-        let b1 = self.ram[self.pc as usize];
-        let b2 = self.ram[(self.pc + 1) as usize];
+    pub fn get_ins(&mut self) -> u16 {
+        let b1 = self.ram.get(self.pc as usize).cloned().unwrap_or_else(|| {
+            eprintln!("Out of bounds when getting instruction. Halted.");
+            self.halt = true;
+            0
+        });
+        let b2 = self
+            .ram
+            .get((self.pc + 1) as usize)
+            .cloned()
+            .unwrap_or_else(|| {
+                eprintln!("Out of bounds when getting instruction. Halted.");
+                self.halt = true;
+                0
+            });
         u16::from(b1) << 8 | u16::from(b2)
     }
 
