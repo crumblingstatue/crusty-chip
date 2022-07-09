@@ -68,14 +68,6 @@ fn run() -> i32 {
         }
     };
 
-    if file.metadata().unwrap().len() > crusty_chip::MEM_SIZE as u64 {
-        eprintln!(
-            "File \"{}\" is too big to be a proper CHIP-8 ROM.",
-            filename
-        );
-        return 1;
-    }
-
     let mut data = Vec::new();
     file.read_to_end(&mut data)
         .unwrap_or_else(|e| panic!("Failed to read rom: {}", e));
@@ -83,13 +75,7 @@ fn run() -> i32 {
     let scale = 10;
 
     let mut ch8 = VirtualMachine::new();
-    match ch8.load_rom(&data) {
-        Ok(data) => data,
-        Err(e) => {
-            eprintln!("Error loading rom: \"{}\". Aborting.", e);
-            return 1;
-        }
-    }
+    ch8.load_rom(&data);
 
     let ctx = ContextSettings::default();
     let mut win = RenderWindow::new(
@@ -124,7 +110,7 @@ fn run() -> i32 {
                         paused = !paused;
                     } else if code == Key::R && ctrl {
                         ch8 = VirtualMachine::new();
-                        ch8.load_rom(&data).expect("ROM data too big? It changed?");
+                        ch8.load_rom(&data);
                     } else if code == Key::Period {
                         advance = true;
                     } else if let Some(key) = sfml_key_to_ch8(code) {

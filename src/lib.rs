@@ -8,7 +8,6 @@
 #![warn(missing_docs, trivial_casts, trivial_numeric_casts)]
 
 use std::num::Wrapping;
-use std::{error, fmt};
 
 mod ops;
 
@@ -183,33 +182,6 @@ pub struct VirtualMachine {
     keypress_wait: KeypressWait,
 }
 
-/// Error that can happen when loading a rom.
-#[derive(Debug)]
-pub enum RomLoadError {
-    /// Rom is too big
-    TooBig(usize),
-}
-
-const MAX_ROM_LEN: usize = MEM_SIZE - START_ADDR as usize;
-
-impl fmt::Display for RomLoadError {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        match *self {
-            RomLoadError::TooBig(size) => write!(
-                f,
-                "Rom size ({}) is too big. The maximum valid rom size is {}.",
-                size, MAX_ROM_LEN
-            ),
-        }
-    }
-}
-
-impl error::Error for RomLoadError {
-    fn description(&self) -> &'static str {
-        "rom load error"
-    }
-}
-
 impl Default for VirtualMachine {
     fn default() -> Self {
         VirtualMachine::new()
@@ -241,13 +213,10 @@ impl VirtualMachine {
     ///
     /// ## Arguments ##
     /// * rom - ROM to load
-    pub fn load_rom(&mut self, rom: &[u8]) -> Result<(), RomLoadError> {
-        let len = rom.len();
-        if len > MAX_ROM_LEN {
-            return Err(RomLoadError::TooBig(len));
-        }
-        self.ram[START_ADDR as usize..START_ADDR as usize + len].copy_from_slice(rom);
-        Ok(())
+    pub fn load_rom(&mut self, rom: &[u8]) {
+        const MAX_ROM_LEN: usize = MEM_SIZE - START_ADDR as usize;
+        let len = std::cmp::min(rom.len(), MAX_ROM_LEN);
+        self.ram[START_ADDR as usize..START_ADDR as usize + len].copy_from_slice(&rom[..len]);
     }
 
     /// Does an interpretation cycle.
