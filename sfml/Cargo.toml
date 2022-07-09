@@ -3,7 +3,7 @@
 name = "crusty-chip-sfml"
 version = "0.1.0"
 authors = [ "radiantstatue@gmail.com" ]
-edition = "2018"
+edition = "2021"
 
 [dependencies.crusty_chip]
 path = "../"
