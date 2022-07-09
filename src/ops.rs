@@ -23,7 +23,12 @@ impl VirtualMachine {
 
     pub(super) fn call_subroutine(&mut self, addr: u16) {
         self.sp += 1;
-        self.stack[self.sp as usize] = self.pc;
+        match self.stack.get_mut(self.sp as usize) {
+            Some(mem) => *mem = self.pc,
+            None => {
+                eprintln!("Stack out of bounds. Ignoring write.");
+            }
+        };
         self.pc = addr;
     }
 
