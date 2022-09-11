@@ -1,12 +1,14 @@
-use crusty_chip::{decode, VirtualMachine, DISPLAY_HEIGHT, DISPLAY_WIDTH};
-use egui_sfml::egui;
-use getopts::Options;
-use sfml::{
-    graphics::{RenderTarget, RenderWindow, Sprite, Texture, Transformable},
-    system::Clock,
-    window::{ContextSettings, Event, Key, Style, VideoMode},
+use {
+    crusty_chip::{decode, VirtualMachine, DISPLAY_HEIGHT, DISPLAY_WIDTH},
+    egui_sfml::egui,
+    getopts::Options,
+    sfml::{
+        graphics::{RenderTarget, RenderWindow, Sprite, Texture, Transformable},
+        system::Clock,
+        window::{ContextSettings, Event, Key, Style, VideoMode},
+    },
+    std::{fmt::Write, fs::File, io::Read},
 };
-use std::{fmt::Write, fs::File, io::Read};
 
 fn sfml_key_to_ch8(code: Key) -> Option<u8> {
     Some(match code {

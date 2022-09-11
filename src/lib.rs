@@ -7,8 +7,7 @@
 
 #![warn(missing_docs, trivial_casts, trivial_numeric_casts)]
 
-use std::fmt::Write;
-use std::num::Wrapping;
+use std::{fmt::Write, num::Wrapping};
 
 mod ops;
 

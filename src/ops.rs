@@ -1,6 +1,7 @@
-use super::VirtualMachine;
-use std::fmt::Write;
-use std::num::Wrapping;
+use {
+    super::VirtualMachine,
+    std::{fmt::Write, num::Wrapping},
+};
 
 impl VirtualMachine {
     pub(super) fn jump_to_sys_routine(&mut self, _addr: usize) {
