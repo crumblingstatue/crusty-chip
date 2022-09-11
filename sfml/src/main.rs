@@ -4,6 +4,7 @@ use getopts::Options;
 use sfml::graphics::{RenderTarget, RenderWindow, Sprite, Texture, Transformable};
 use sfml::system::Clock;
 use sfml::window::{ContextSettings, Event, Key, Style, VideoMode};
+use std::fmt::Write;
 use std::fs::File;
 use std::io::Read;
 
@@ -130,10 +131,10 @@ fn run() -> i32 {
                             if code == Key::$k {
                                 if shift {
                                     saved_states[$s] = Some(ch8.clone());
-                                    eprintln!("Saved state {}.", $s);
+                                    writeln!(ch8.log, "Saved state {}.", $s).unwrap();
                                 } else if let Some(state) = saved_states[$s].clone() {
                                     ch8 = state;
-                                    eprintln!("Loaded state {}.", $s);
+                                    writeln!(ch8.log, "Loaded state {}.", $s).unwrap();
                                 }
                             }
                         )
@@ -212,13 +213,15 @@ fn do_emulation_cycle(
 
     if paused && !*printed_info {
         let raw_ins = ch8.get_ins();
-        println!(
+        writeln!(
+            ch8.log,
             "Cycle {}, pc @ {:#x}, ins: {:#x?} raw: {:#x}",
             cycles_made,
             ch8.pc(),
             decode(raw_ins),
             raw_ins
-        );
+        )
+        .unwrap();
         *printed_info = true;
     }
 
