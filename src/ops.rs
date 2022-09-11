@@ -1,6 +1,6 @@
 use super::VirtualMachine;
-use std::num::Wrapping;
 use std::fmt::Write;
+use std::num::Wrapping;
 
 impl VirtualMachine {
     pub(super) fn jump_to_sys_routine(&mut self, _addr: usize) {
@@ -76,21 +76,20 @@ impl VirtualMachine {
     }
 
     pub(super) fn add_vx_vy(&mut self, x: usize, y: usize) {
-        self.v[0xF].0 = if u16::from(self.v[x].0) + u16::from(self.v[y].0) > 255 {
-            1
-        } else {
-            0
-        };
+        let cond = u16::from(self.v[x].0) + u16::from(self.v[y].0) > 255;
+        self.v[0xF].0 = cond.into();
         self.v[x] += self.v[y];
     }
 
     pub(super) fn sub_vx_vy(&mut self, x: usize, y: usize) {
-        self.v[0xF].0 = if self.v[x] > self.v[y] { 1 } else { 0 };
+        let cond = self.v[x] > self.v[y];
+        self.v[0xF].0 = cond.into();
         self.v[x] -= self.v[y];
     }
 
     pub(super) fn subn_vx_vy(&mut self, x: usize, y: usize) {
-        self.v[0xF].0 = if self.v[y] > self.v[x] { 1 } else { 0 };
+        let cond = self.v[y] > self.v[x];
+        self.v[0xF].0 = cond.into();
         self.v[x] = self.v[y] - self.v[x];
     }
 
@@ -209,11 +208,7 @@ impl VirtualMachine {
 
 fn nth_bit(byte: u8, pos: usize) -> u8 {
     use bit_utils::BitInformation;
-    if byte.has_x_bit(7 - pos) {
-        1
-    } else {
-        0
-    }
+    byte.has_x_bit(7 - pos).into()
 }
 
 #[test]
