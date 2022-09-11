@@ -63,7 +63,7 @@ fn run() -> i32 {
 
     let mut clock = Clock::start();
 
-    let file = match File::open(&filename) {
+    let file = match File::open(filename) {
         Ok(f) => f,
         Err(e) => {
             eprintln!("Failed to open \"{}\": {}", filename, e);
@@ -179,7 +179,7 @@ fn run() -> i32 {
                 .open(&mut log_open)
                 .show(ctx, |ui| {
                     egui::ScrollArea::vertical()
-                        .stick_to_bottom()
+                        .stick_to_bottom(true)
                         .max_height(200.)
                         .show(ui, |ui| {
                             let log_size = 5000;

@@ -9,6 +9,6 @@ edition = "2021"
 path = "../"
 
 [dependencies]
-sfml = { git = "https://github.com/jeremyletang/rust-sfml.git" }
-egui-sfml = { git = "https://github.com/crumblingstatue/egui-sfml.git", version = "0.1.0" }
+sfml = "0.18.0"
+egui-sfml = "0.1.1"
 getopts = "0.2.21"
