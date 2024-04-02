@@ -1,12 +1,14 @@
 use {
     crusty_chip::{decode, VirtualMachine, DISPLAY_HEIGHT, DISPLAY_WIDTH},
-    egui_sfml::egui,
-    getopts::Options,
-    sfml::{
-        graphics::{RenderTarget, RenderWindow, Sprite, Texture, Transformable},
-        system::Clock,
-        window::{ContextSettings, Event, Key, Style, VideoMode},
+    egui_sfml::{
+        egui,
+        sfml::{
+            graphics::{RenderTarget, RenderWindow, Sprite, Texture, Transformable},
+            system::Clock,
+            window::{ContextSettings, Event, Key, Style, VideoMode},
+        },
     },
+    getopts::Options,
     std::{fmt::Write, fs::File, io::Read},
 };
 
@@ -64,7 +66,7 @@ fn run() -> i32 {
 
     let mut log_open = false;
 
-    let mut clock = Clock::start();
+    let mut clock = Clock::start().unwrap();
 
     let file = match File::open(filename) {
         Ok(f) => f,
@@ -100,7 +102,10 @@ fn run() -> i32 {
     let mut sf_egui = egui_sfml::SfEgui::new(&win);
 
     let mut tex = Texture::new().unwrap();
-    if !tex.create(DISPLAY_WIDTH as u32, DISPLAY_HEIGHT as u32) {
+    if tex
+        .create(DISPLAY_WIDTH as u32, DISPLAY_HEIGHT as u32)
+        .is_err()
+    {
         panic!("Couldn't create texture");
     }
     let mut saved_states: [Option<VirtualMachine>; 10] = std::array::from_fn(|_idx| None);
@@ -177,22 +182,24 @@ fn run() -> i32 {
                 break;
             }
         }
-        sf_egui.do_frame(|ctx| {
-            egui::Window::new("Log (F11)")
-                .open(&mut log_open)
-                .show(ctx, |ui| {
-                    egui::ScrollArea::vertical()
-                        .stick_to_bottom(true)
-                        .max_height(200.)
-                        .show(ui, |ui| {
-                            let log_size = 5000;
-                            if ch8.log.len() > log_size {
-                                ch8.log = ch8.log[ch8.log.len() - log_size..].to_owned();
-                            }
-                            ui.label(&ch8.log);
-                        });
-                });
-        });
+        sf_egui
+            .do_pass(&mut win, |ctx| {
+                egui::Window::new("Log (F11)")
+                    .open(&mut log_open)
+                    .show(ctx, |ui| {
+                        egui::ScrollArea::vertical()
+                            .stick_to_bottom(true)
+                            .max_height(200.)
+                            .show(ui, |ui| {
+                                let log_size = 5000;
+                                if ch8.log.len() > log_size {
+                                    ch8.log = ch8.log[ch8.log.len() - log_size..].to_owned();
+                                }
+                                ui.label(&ch8.log);
+                            });
+                    });
+            })
+            .unwrap();
         render_screen(&mut win, &mut tex, &ch8, scale as f32);
         ch8.clear_du_flag();
         sf_egui.draw(&mut win, None);
