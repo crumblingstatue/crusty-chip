@@ -132,6 +132,7 @@ pub fn decode(ins: u16) -> Instruction {
 
 const START_ADDR: u16 = 0x200;
 /// The memory size of the Chip-8 virtual machine.
+///
 /// It doesn't make sense to feed it data something larger than this, so you can use this
 /// to .e.g. reject files that are larger than this when loading the ROM.
 pub const MEM_SIZE: usize = 4096;
