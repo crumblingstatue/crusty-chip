@@ -132,10 +132,12 @@ pub fn decode(ins: u16) -> Instruction {
 
 const START_ADDR: u16 = 0x200;
 /// The memory size of the Chip-8 virtual machine.
-///
-/// It doesn't make sense to feed it data something larger than this, so you can use this
-/// to .e.g. reject files that are larger than this when loading the ROM.
 pub const MEM_SIZE: usize = 4096;
+/// Maximum allowed ROM length
+///
+/// It doesn't make sense to feed the VM something larger than this, so you can use this
+/// to .e.g. reject files that are larger than this when loading the ROM.
+pub const MAX_ROM_LEN: usize = MEM_SIZE - START_ADDR as usize;
 /// The width of the Chip8's display in pixels.
 pub const DISPLAY_WIDTH: usize = 64;
 /// The height of the Chip8's display in pixels.
@@ -220,7 +222,6 @@ impl VirtualMachine {
     /// ## Arguments ##
     /// * rom - ROM to load
     pub fn load_rom(&mut self, rom: &[u8]) {
-        const MAX_ROM_LEN: usize = MEM_SIZE - START_ADDR as usize;
         let len = std::cmp::min(rom.len(), MAX_ROM_LEN);
         self.ram[START_ADDR as usize..START_ADDR as usize + len].copy_from_slice(&rom[..len]);
     }
