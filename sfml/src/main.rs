@@ -96,7 +96,8 @@ fn run() -> i32 {
         "CrustyChip",
         Style::CLOSE,
         &ctx,
-    );
+    )
+    .unwrap();
     win.set_vertical_sync_enabled(true);
 
     let mut sf_egui = egui_sfml::SfEgui::new(&win);
@@ -182,8 +183,8 @@ fn run() -> i32 {
                 break;
             }
         }
-        sf_egui
-            .do_pass(&mut win, |ctx| {
+        let di = sf_egui
+            .run(&mut win, |_rw, ctx| {
                 egui::Window::new("Log (F11)")
                     .open(&mut log_open)
                     .show(ctx, |ui| {
@@ -202,7 +203,7 @@ fn run() -> i32 {
             .unwrap();
         render_screen(&mut win, &mut tex, &ch8, scale as f32);
         ch8.clear_du_flag();
-        sf_egui.draw(&mut win, None);
+        sf_egui.draw(di, &mut win, None);
         win.display();
     }
 }
@@ -253,9 +254,7 @@ fn render_screen(win: &mut RenderWindow, tex: &mut Texture, ch8: &VirtualMachine
         }
     }
 
-    unsafe {
-        tex.update_from_pixels(&pixels, DISPLAY_WIDTH as u32, DISPLAY_HEIGHT as u32, 0, 0);
-    }
+    tex.update_from_pixels(&pixels, DISPLAY_WIDTH as u32, DISPLAY_HEIGHT as u32, 0, 0);
     let mut sprite = Sprite::with_texture(tex);
     sprite.set_scale((scale, scale));
     win.draw(&sprite);
