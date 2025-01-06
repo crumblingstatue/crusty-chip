@@ -55,7 +55,7 @@ fn main() -> ExitCode {
 
     let mut paused = matches.opt_present("pause");
 
-    let filename = match matches.free.get(0) {
+    let filename = match matches.free.first() {
         Some(filename) => filename,
         None => {
             eprintln!("Required filename as first positional argument.\n");
