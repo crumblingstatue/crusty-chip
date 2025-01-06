@@ -292,7 +292,7 @@ impl VirtualMachine {
                 self.halt = true;
                 0
             });
-        u16::from(b1) << 8 | u16::from(b2)
+        (u16::from(b1) << 8) | u16::from(b2)
     }
 
     /// Returns the value of the program counter.
