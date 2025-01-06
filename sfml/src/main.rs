@@ -9,7 +9,7 @@ use {
         },
     },
     getopts::Options,
-    std::{fmt::Write, fs::File, io::Read},
+    std::{fmt::Write, fs::File, io::Read, process::ExitCode},
 };
 
 fn sfml_key_to_ch8(code: Key) -> Option<u8> {
@@ -39,7 +39,7 @@ fn usage(progname: &str, opts: &Options) -> String {
     format!("Usage: {}", opts.usage(&brief))
 }
 
-fn run() -> i32 {
+fn main() -> ExitCode {
     let mut args = std::env::args();
     let progname = args.next().expect("Missing program name?");
     let mut opts = Options::new();
@@ -49,7 +49,7 @@ fn run() -> i32 {
         Ok(matches) => matches,
         Err(e) => {
             eprintln!("{}\n\n{}", e, usage(&progname, &opts));
-            return 1;
+            return ExitCode::FAILURE;
         }
     };
 
@@ -60,7 +60,7 @@ fn run() -> i32 {
         None => {
             eprintln!("Required filename as first positional argument.\n");
             eprintln!("{}", usage(&progname, &opts));
-            return 1;
+            return ExitCode::FAILURE;
         }
     };
 
@@ -72,7 +72,7 @@ fn run() -> i32 {
         Ok(f) => f,
         Err(e) => {
             eprintln!("Failed to open \"{}\": {}", filename, e);
-            return 1;
+            return ExitCode::FAILURE;
         }
     };
 
@@ -118,7 +118,7 @@ fn run() -> i32 {
         while let Some(event) = win.poll_event() {
             sf_egui.add_event(&event);
             match event {
-                Event::Closed => return 0,
+                Event::Closed => return ExitCode::SUCCESS,
                 Event::KeyPressed {
                     code, ctrl, shift, ..
                 } => {
@@ -258,8 +258,4 @@ fn render_screen(win: &mut RenderWindow, tex: &mut Texture, ch8: &VirtualMachine
     let mut sprite = Sprite::with_texture(tex);
     sprite.set_scale((scale, scale));
     win.draw(&sprite);
-}
-
-fn main() {
-    std::process::exit(run());
 }
