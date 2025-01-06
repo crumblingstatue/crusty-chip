@@ -1,5 +1,5 @@
 use {
-    crusty_chip::{decode, VirtualMachine, DISPLAY_HEIGHT, DISPLAY_WIDTH},
+    crusty_chip::{DISPLAY_HEIGHT, DISPLAY_WIDTH, VirtualMachine, decode},
     egui_sfml::{
         egui,
         sfml::{

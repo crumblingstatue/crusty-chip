@@ -116,7 +116,7 @@ impl VirtualMachine {
     pub(super) fn set_vx_rand_and(&mut self, x: usize, to: u8) {
         use rand::Rng;
         let mut rgen = rand::thread_rng();
-        self.v[x].0 = rgen.gen::<u8>() & to;
+        self.v[x].0 = rgen.r#gen::<u8>() & to;
     }
 
     pub(super) fn display_sprite(&mut self, vx: usize, vy: usize, n: usize) {

@@ -3,7 +3,7 @@
 name = "crusty_chip"
 version = "0.1.0"
 authors = [ "radiantstatue@gmail.com" ]
-edition = "2021"
+edition = "2024"
 
 [dependencies]
 rand = "0.8.5"
