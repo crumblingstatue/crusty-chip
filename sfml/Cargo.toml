@@ -10,4 +10,5 @@ path = "../"
 
 [dependencies]
 egui-sfml = { git = "https://github.com/crumblingstatue/egui-sfml.git" }
+egui_memory_editor = "0.2.12"
 getopts = "0.2.21"

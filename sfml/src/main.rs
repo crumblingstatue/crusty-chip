@@ -1,9 +1,12 @@
 use {
     crusty_chip::{DISPLAY_HEIGHT, DISPLAY_WIDTH, VirtualMachine, decode},
+    egui_memory_editor::MemoryEditor,
     egui_sfml::{
         egui,
         sfml::{
-            graphics::{RenderTarget, RenderWindow, Sprite, Texture, Transformable},
+            graphics::{
+                Color, Rect, RenderTarget, RenderWindow, Sprite, Texture, Transformable, View,
+            },
             system::Clock,
             window::{ContextSettings, Event, Key, Style, VideoMode},
         },
@@ -65,6 +68,7 @@ fn main() -> ExitCode {
     };
 
     let mut log_open = false;
+    let mut mem_edit_open = false;
 
     let mut clock = Clock::start().unwrap();
 
@@ -94,7 +98,7 @@ fn main() -> ExitCode {
             32,
         ),
         "CrustyChip",
-        Style::CLOSE,
+        Style::DEFAULT,
         &ctx,
     )
     .unwrap();
@@ -112,6 +116,7 @@ fn main() -> ExitCode {
     let mut saved_states: [Option<VirtualMachine>; 10] = std::array::from_fn(|_idx| None);
     let mut printed_info = false;
     let mut cycles_made: u64 = 0;
+    let mut mem_edit = MemoryEditor::new().with_address_range("Default", 0..crusty_chip::MEM_SIZE);
 
     loop {
         let mut advance = false;
@@ -129,6 +134,8 @@ fn main() -> ExitCode {
                         ch8.load_rom(&data);
                     } else if code == Key::Period {
                         advance = true;
+                    } else if code == Key::F10 {
+                        mem_edit_open ^= true;
                     } else if code == Key::F11 {
                         log_open ^= true;
                     } else if let Some(key) = sfml_key_to_ch8(code) {
@@ -157,6 +164,11 @@ fn main() -> ExitCode {
                     state_key!(7, F8);
                     state_key!(8, F9);
                     state_key!(9, F10);
+                }
+                Event::Resized { width, height } => {
+                    win.set_view(
+                        &View::from_rect(Rect::new(0., 0., width as f32, height as f32)).unwrap(),
+                    );
                 }
                 Event::KeyReleased { code, .. } => {
                     if let Some(key) = sfml_key_to_ch8(code) {
@@ -199,8 +211,18 @@ fn main() -> ExitCode {
                                 ui.label(&ch8.log);
                             });
                     });
+                egui::Window::new("Memory Edit (F10)")
+                    .open(&mut mem_edit_open)
+                    .show(ctx, |ui| {
+                        let read = |mem: &mut crusty_chip::Ram, addr| mem.get(addr).copied();
+                        let write = |mem: &mut crusty_chip::Ram, addr, val| {
+                            mem[addr] = val;
+                        };
+                        mem_edit.draw_editor_contents(ui, &mut ch8.ram, read, write);
+                    });
             })
             .unwrap();
+        win.clear(Color::BLACK);
         render_screen(&mut win, &mut tex, &ch8, scale as f32);
         ch8.clear_du_flag();
         sf_egui.draw(di, &mut win, None);
