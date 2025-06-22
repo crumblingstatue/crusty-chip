@@ -38,7 +38,7 @@ fn sfml_key_to_ch8(code: Key) -> Option<u8> {
 }
 
 fn usage(progname: &str, opts: &Options) -> String {
-    let brief = format!("{} rom_file", progname);
+    let brief = format!("{progname} rom_file");
     format!("Usage: {}", opts.usage(&brief))
 }
 
@@ -75,7 +75,7 @@ fn main() -> ExitCode {
     let file = match File::open(filename) {
         Ok(f) => f,
         Err(e) => {
-            eprintln!("Failed to open \"{}\": {}", filename, e);
+            eprintln!("Failed to open \"{filename}\": {e}");
             return ExitCode::FAILURE;
         }
     };
@@ -83,7 +83,7 @@ fn main() -> ExitCode {
     let mut data = Vec::new();
     file.take(crusty_chip::MEM_SIZE as u64)
         .read_to_end(&mut data)
-        .unwrap_or_else(|e| panic!("Failed to read rom: {}", e));
+        .unwrap_or_else(|e| panic!("Failed to read rom: {e}"));
 
     let scale = 10;
 
