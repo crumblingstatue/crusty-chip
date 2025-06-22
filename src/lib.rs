@@ -168,11 +168,13 @@ struct KeypressWait {
     vx: usize,
 }
 
+/// RAM of the CHIP-8 virtual machine
 pub type Ram = [u8; MEM_SIZE];
 
 /// A CHIP-8 virtual machine.
 #[derive(Clone)]
 pub struct VirtualMachine {
+    /// The RAM (random access memory)
     pub ram: Ram,
     v: [Wrapping<u8>; 16],
     i: u16,
