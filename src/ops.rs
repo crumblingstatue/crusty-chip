@@ -15,8 +15,10 @@ impl VirtualMachine {
     }
 
     pub(super) fn ret_from_subroutine(&mut self) {
-        self.pc = self.stack[self.sp.0 as usize];
-        self.sp -= 1;
+        if let Some(pc) = self.stack.get(self.sp.0 as usize).copied() {
+            self.pc = pc;
+            self.sp -= 1;
+        }
     }
 
     pub(super) fn jump_addr(&mut self, addr: u16) {
