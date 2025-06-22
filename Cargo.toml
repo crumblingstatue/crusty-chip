@@ -6,7 +6,7 @@ authors = [ "radiantstatue@gmail.com" ]
 edition = "2024"
 
 [dependencies]
-rand = "0.8.5"
+rand = "0.9"
 bit_utils = "0.1.1"
 
 [workspace]
